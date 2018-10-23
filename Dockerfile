@@ -8,7 +8,8 @@ FROM tomcat:8-jre8
 MAINTAINER Fedde Schaeffer <fedde@thehyve.nl>
 
 # install build and runtime dependencies and configure Tomcat for production
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update --fix-missing
+RUN apt-get install -y --no-install-recommends --fix-missing \
 		git \
 		libmysql-java \
 		maven \
