@@ -27,7 +27,7 @@ docker run -d --restart=always \
     -e MYSQL_USER=keycloak \
     -e MYSQL_PASSWORD=password \
     -e MYSQL_ROOT_PASSWORD=root_password \
-    mysql
+    mysql:5.7
 ```
 
 Then run the actual Keycloak server, using
@@ -39,22 +39,29 @@ sure to choose a strong administrator password.
 
 The command below uses the default values for `MYSQL_DATABASE`, `MYSQL_USER` and `MYSQL_PASSWORD` (listed in the command above). If you wish to change these credentials, specify them in the command below. For instance, if `MYSQL_USER` in the database container is `user`, you need to add `-e MYSQL_USER=user`.
 
-```
+```sh
 docker run -d --restart=always \
     --name=cbiokc \
     --net=kcnet \
     -p 8180:8080 \
-    -e MYSQL_PORT_3306_TCP_ADDR=kcdb \
-    -e MYSQL_PORT_3306_TCP_PORT=3306 \
+    -e DB_VENDOR=mysql \
+    -e DB_ADDR=kcdb \
     -e KEYCLOAK_USER=admin \
     -e "KEYCLOAK_PASSWORD=<admin_password_here>" \
-    -e DB_VENDOR="MYSQL" \
-    jboss/keycloak
+    jboss/keycloak:4.8.3.Final
 ```
 
 Finally, configure Keycloak and cBioPortal as explained in the
 [cBioPortal documentation](https://cbioportal.readthedocs.io/en/latest/Authenticating-and-Authorizing-Users-via-keycloak.html#configure-keycloak-to-authenticate-your-cbioportal-instance).
-Click [here](adjusting_portal.properties_configuration.md) for an
+Click [here](adjusting_configuration.md) for a general
 explanation on how to adjust portal properties used when building a
 Docker image for cBioPortal, and remember to specify port 8180 for the
 Keycloak server, wherever the guide says 8080.
+
+When starting the cBioPortal web server with the new configuration, instead of
+modifying Tomcat config files, include the `-Dauthenticate=saml` flag in the
+`CATALINA_OPTS` argument on the command line:
+
+```
+    -e CATALINA_OPTS='-Xms2g -Xmx4g -Dauthenticate=saml' \
+```
