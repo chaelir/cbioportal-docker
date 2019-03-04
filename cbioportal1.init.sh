@@ -4,7 +4,7 @@ set -x
 
 ### define the portal.properties file to be configured by this init script ###
 # for Bash compatibility, use "${var}" instead of '$var' or '${var}'
-my_configure_file="${HOME}/setup/cbioportal-docker/portal.properties.cbioportal1"
+portal_configure_file="${HOME}/setup/cbioportal-docker/portal.properties.cbioportal1"
 
 ### current configurable portal.properties variables ###
 # for Bash compatibility, changed variable names x.y to x_y
@@ -12,17 +12,19 @@ db_user="cbio1"
 db_password="P@ssword1"
 db_host="cbioDB1"
 portal_db_name="cbioportal1"
-sed -i -e "s/db.user=.*/db.user=${db_user}/g" ${my_configure_file}
-sed -i -e "s/db.password=.*/db.password=${db_password}/g" ${my_configure_file}
-sed -i -e "s/db.host=.*/db.host=${db_host}/g" ${my_configure_file}
-sed -i -e "s/portal.db.name=.*/portal.db.name=${portal_db_name}/g" ${my_configure_file}
+sed -i -e "s/db.user=.*/db.user=${db_user}/g" ${portal_configure_file}
+sed -i -e "s/db.password=.*/db.password=${db_password}/g" ${portal_configure_file}
+sed -i -e "s/db.host=.*/db.host=${db_host}/g" ${portal_configure_file}
+sed -i -e "s/portal.db.name=.*/portal.db.name=${portal_db_name}/g" ${portal_configure_file}
 
 ### current configurable none portal.properties variables ###
-docker_network='cbio-net1'
-docker_cbio_source='https://github.com/chaelir/cbioportal-docker.git'
-docker_cbio_image='cbioportal-v1.17'
-docker_cbio_instance=
+docker_network="cbio-net1"
+docker_cbio_source="https://github.com/chaelir/cbioportal-docker.git"
+docker_cbio_image="cbioportal-v1.17"
+docker_cbio_instance="cbioPortal1"
+docker_cbio_dockerfile="Dockerfile.v1.17"
 docker_cbio_port=8881
+docker_cbio_opt="\'-Xms2g -Xmx4g\'" #important to keep single quote
 docker_db_wait=10
 db_dataseed_path="${HOME}/setup/datahub/seedDB"
 db_dataseed_sql="seed-cbioportal_hg19_v2.6.0.sql.gz"
@@ -58,9 +60,8 @@ docker run \
       && zcat /mnt/seed.sql.gz |  mysql -h${db_host} -u${db_user} -p${db_password} ${portal_db_name}"
 
 ### build cbioportal docker image
-docker build -t ${docker_cbio_image} ${docker_cbio_source}
-
-exit
+# adding --no-cache is important to avoid cannot fetch errors from apt-get
+docker build --no-cache -t ${docker_cbio_image} -f ${docker_cbio_dockerfile} ${docker_cbio_source}
 
 ### migrate db (optional) ###
 #docker run --rm -it --net cbio-net \
@@ -70,11 +71,10 @@ exit
 
 ### run cbio portal service ###
 docker run -d --restart=always \
-    --name=run-cbioportal \
+    --name=${docker_cbio_instance} \
     --net=${docker_network} \
-    -v /<path_to_config_file>/portal.properties:/cbioportal/portal.properties:ro \
-    -e CATALINA_OPTS='-Xms2g -Xmx4g' \
-    -p 8081:8080 \
-    cbioportal-image
-
+    -v ${portal_configure_file}:/cbioportal/portal.properties:ro \
+    -e CATALINA_OPTS=${docker_cbio_opt}  \
+    -p ${docker_cbio_port}:8080 \
+		${docker_cbio_image}
 
