@@ -5,9 +5,9 @@ app.name=cbioportal
 db.user=cbio1
 db.password=P@ssword1
 db.host=cbioDB1
-db.portal.db.name=cbioportal1
+db.portal_db_name=cbioportal1
 db.driver=com.mysql.jdbc.Driver
-db.connection_string=jdbc:mysql://cbioDB/
+db.connection_string=jdbc:mysql://cbioDB1/
 db.tomcat_resource_name=jdbc/cbioportal
 # this should normally be set to false. In some cases you could set this to true (e.g. for testing a feature of a newer release that is not related to the schema change in expected db version above):
 db.suppress_schema_version_mismatch_errors=false
