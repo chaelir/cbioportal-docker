@@ -21,13 +21,14 @@ sed -i -e "s/db.host=.*/db.host=${db_host}/g" ${portal_configure_file}
 sed -i -e "s/portal.db.name=.*/portal.db.name=${portal_db_name}/g" ${portal_configure_file}
 
 ### current configurable none portal.properties variables ###
+docker_restart="no"
 docker_network="cbio-net1"
 docker_cbio_source="https://github.com/chaelir/cbioportal-docker.git"
 docker_cbio_image="cbioportal-v1.17"
 docker_cbio_instance="cbioPortal1"
 docker_cbio_dockerfile="Dockerfile.v1.17"
 docker_cbio_port=8881
-docker_cbio_opt="\"-Xms2g -Xmx4g\"" #important to keep single quote
+docker_cbio_opt="'-Xms2g -Xmx4g'" #tricky quote issue, important to preserve quote this way
 docker_db_wait=10
 db_dataseed_path="${HOME}/setup/datahub/seedDB"
 db_dataseed_sql="seed-cbioportal_hg19_v2.6.0.sql.gz"
@@ -41,7 +42,7 @@ docker network create ${docker_network} || true
 if [ $stage == 'run_mysql' ]; then
   mkdir ${db_runtime_path}/${db_host} || true
   docker rm -f ${db_host} || true
-  docker run -d --restart=always \
+  docker run -d --restart=${docker_restart} \
     --name=${db_host} \
     --net=${docker_network} \
     -e MYSQL_ROOT_PASSWORD="${db_password}" \
@@ -79,13 +80,14 @@ fi
 #    migrate_db.py -p /cbioportal/portal.properties -s /cbioportal/db-scripts/src/main/resources/migration.sql
 
 ### run cbio portal service ###
+echo ${docker_cbio_opt}
 if [ $stage == 'run_cbio' ]; then
   docker rm -f ${docker_cbio_instance} || true
-  docker run -d \ #--restart=always \
+  docker run -d --restart=${docker_restart} \
       --name=${docker_cbio_instance} \
       --net=${docker_network} \
       -v ${portal_configure_file}:/cbioportal/portal.properties:ro \
-      -e CATALINA_OPTS="${docker_cbio_opt}"  \
+      -e CATALINA_OPTS='${docker_cbio_opt}' \
       -p ${docker_cbio_port}:8080 \
 		${docker_cbio_image}
 fi
