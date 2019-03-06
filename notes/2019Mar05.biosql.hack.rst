@@ -30,24 +30,42 @@ Import BS_* to cbioportal
 ===========================================
 mysql -ucbio_user -ppassword cbioportal < BS_tables_export.sql
 
-docker run --rm \
-  --name=load-biosql \
-  --net=cbio_net \
-  -e MYSQL_USER=cbio \
-  -e MYSQL_PASSWORD=P@ssword1 \
-  -v /${CBIO_DATAPRIV}:/mnt \
-  mysql:5.7.22 \
-  sh -c 'cat /mnt/query/biosqldb-mysql.sql | mysql -hcbioDB -ucbio -pP@ssword1 cbioportal'
 
-1. Add NCBI TAXONOMY DATABASE TO CBIOPORTAL
-	1. ~/setup/datahub_priv/taxonomy
-	2. ~/setup/datahub_priv/query
-	3. BioSQL: https://biosql.org/wiki/Downloads
-	4. BioSQL: https://github.com/biosql/biosql.github.io/blob/master/wiki/Main_Page.md
-	5. Lineager: https://vimal.io/lineager/
-	
-Populate these two tables:
-2. Create: microbe_profile (microbe_profile_id, stable_id, cancer_study_id, microbe_alteration_type, data_type, name, description)
-3. Create: microbe_alteration (microbe_profile_id, taxon_id, values(N=samples))
-4. Modify: write import code （core/src/main/scripts/importer/cbioportal_common.py） to populate these tables
+Connecting cBioPortal to BioSeq
+===========================================
+1. Create IM_microbe_profile like genetic_profile:
+         genetic_profile_id -> microbe_profile_id, 
+         genetic_alteration_type -> microbe_alteration_type, 
+         stable_id, 
+         cancer_study_id, 
+         data_type, 
+         name, 
+         description
+2. Create IM_microbe_alteration like genetic_alteration:
+         genetic_profile_id -> microbe_profile_id
+         genetic_entity_id -> microbe_entity_id 
+3. Create IM_microbe_entity like genetic_entity:
+         ID(microbe_entity_id) -> MICROBE (i.e. BS_taxon.taxon_id)
+3. Create IM_microbe_entity like genetic_entity:
+         ID(cell_entity_id) -> CELL
+5. Create IM_microbe like gene
+				 Entrez_gene_id -> ncbi_taxon_id (i.e. BS_taxon.ncbi_taxon_id)
+				 Hugo_gene_symbol -> ncbi_taxon_name (i.e. BS_taxon_name.name)
+         genetic_entity_id -> microbe_entity_id (i.e. BS_taxon.taxon_id)
+         cytoband -> taxon_level (i.e. BS_taxon.node_rank)
+         type,
+         length,
+4. Create IM_cell_alteration like genetic_alteration:
+         genetic_profile_id -> cell_profile_id
+         genetic_entity_id -> cell_entity_id 
+5. Create IM_cell_profile like genetic_profile:
+         genetic_profile_id -> cell_profile_id, 
+         genetic_alteration_type -> cell_alteration_type, 
+         stable_id, 
+         cancer_study_id, 
+         data_type, 
+         name, 
+         description
+6. Prepare an importable set of microbiome and immune cell data (CRC data)
+7. Create import code （core/src/main/scripts/importer/cbioportal_common.py）to populate those tables
 Modify: front end code to display these tables
