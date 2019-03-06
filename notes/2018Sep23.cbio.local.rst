@@ -1,0 +1,24 @@
+--------------------------------- ARCHIVE --------------------------------------------- 
+
+Install CBioPortal on a Mac (obsolete - no longer needed, will use docker for both local and remote management for now):
+https://github.com/chaelir/datahub.git
+https://github.com/chaelir/cbioportal.git
+Brew install git-lfs
+Brew install mysql@5.7 #very version picky, has to use mysql57
+Brew install maven
+Brew install tomcat
+pip install mysql-python
+mysql_upgrade -u root -p password --force
+Brew services start tomcat
+Brew services start mysql@5.7
+#Following steps in:
+https://cbioportal.readthedocs.io/en/latest/Pre-Build-Steps.html
+#Check database service alive at http://localhost:8080/cbioportal 
+#It is critical to change time_zone that tomcat not reporting 404 error
+mysql --verbose --help | grep my.cnf
+# set default-time-zone that works for tomcat
+default-time-zone='+00:00'
+validateData.py -s coadread_tcga -u http://localhost:8080/cbioportal -v #validate a study
+metaImport.py -s coadread_tcga -u http://localhost:8080/cbioportal -html  myReport.html -v -o #import a study
+#After import need to restart tomcat and mysql to view datasets
+cbioportalImporter.py -c remove-study -meta devel/meta_study.txt.bak #remove a study

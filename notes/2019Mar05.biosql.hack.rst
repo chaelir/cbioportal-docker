@@ -6,21 +6,29 @@ Import biosql to mysql
 mysqladmin -uroot -ppassword create biosql
 mysql -uroot -ppassword -ve "CREATE USER 'biosql_user'@'localhost' IDENTIFIED BY 'password'"
 mysql -uroot -ppassword -ve "GRANT ALL PRIVILEGES ON biosql.* TO 'biosql_user'@'localhost' IDENTIFIED BY 'password'"
+mysql -uroot -ppassword -ve "GRANT ALL PRIVILEGES ON cbioportal.* TO 'cbio_user'@'localhost' IDENTIFIED BY 'password'"
 mysql -uroot -ppassword -ve "FLUSH PRIVILEGES"
 mysql -ubiosql_user -ppassword biosql < biosqldb-mysql.sql
 
 Populate biosql with NCBI taxonomy
 ===========================================
 [mac] brew install openssl mysql-connector-c
-[mac] cpan install DBD::mysql
+cpan install DBD::mysql
 git clone https://github.com/chaelir/biosql.git
+patch load_ncbi_taxonomy.pl
+load_ncbi_taxonomy.pl --download --driver mysql --dbname biosql --dbuser biosql_user --dbpass password
 
-Rename tables in biosql.* by immube.biosql_*
+Rename tables in biosql.* by biosql.BS_*
 ===========================================
+mysql -ubiosql_user -ppassword -AN -e"select concat('alter table ', db, '.', tb, ' rename ', db, '.', prfx, tb,';') from (select table_schema db,table_name tb from information_schema.tables where table_schema='biosql') A,(SELECT 'BS_' prfx) B" | mysql -ubiosql_user -ppassword -AN
 
-
-Import immube.biosql_* to cbioportal 
+Export BS_* to an importable file
 ===========================================
+mysqldump -ubiosql_user -ppassword biosql > BS_tables_export.sql
+
+Import BS_* to cbioportal 
+===========================================
+mysql -ucbio_user -ppassword cbioportal < BS_tables_export.sql
 
 docker run --rm \
   --name=load-biosql \
