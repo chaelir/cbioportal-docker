@@ -1,0 +1,59 @@
+### Add Public data to AWS/Mac ###
+==================================
+
+#install git lfs download data on ubuntu
+[cbio] git lfs pull -I public/crc_msk_2018; \
+  git lfs pull -I public/coadread_tcga; \
+  git lfs pull -I public/brca_mbcproject_wagle_2017; \
+  git lfs pull -I public/brca_tcga; \
+  git lfs pull -I public/stad_tcga;
+
+#import data, INFO: import scripts are included in /usr/bin/local  and directly available
+[cbio/mac] docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal -s /mnt/datahub/public/coadread_tcga -o; \
+  docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal -s /mnt/datahub/public/crc_msk_2018 -o; \
+  docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal -s /mnt/datahub/public/brca_mbcproject_wagle_2017 -o; \
+  docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal -s /mnt/datahub/public/brca_tcga -o; \
+  docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal -s /mnt/datahub/public/stad_tcga -o;
+
+#restart tomcat [if dataset is not displayed, just need to restart cbioportal-image]
+#[cbio/mac] docker exec -it cbioportal-image \
+# sh /usr/local/tomcat/bin/shutdown.sh \
+# '&&' sh /usr/local/tomcat/bin/startup.sh #restart tomcat after data import
+#check http://cbioportal-image:8081/cbioportal/ works 
+#check http://ec2-34-222-168-6.us-west-2.compute.amazonaws.com:8081/cbioportal #worked OK!
+
+#docker restart cbioportal-image
+#add more crc data  
+git lfs pull -I public/coadread_dfci_2016 && \
+  git lfs pull -I public/coadread_genentech && \
+  git lfs pull -I public/coadread_mskcc
+docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal/ -s /mnt/datahub/public/coadread_dfci_2016 -o && \
+docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal/ -s /mnt/datahub/public/coadread_genentech -o && \
+docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal/ -s /mnt/datahub/public/coadread_mskcc -o
+
+#add ALL brca data
+git lfs pull -I public/brca_bccrc&& \
+git lfs pull -I public/brca_broad && \
+git lfs pull -I public/brca_igr_2015 && \
+git lfs pull -I public/brca_sanger && \
+git lfs pull -I public/brca_tcga && \
+git lfs pull -I public/brca_metabric && \
+git lfs pull -I public/brca_tcga_pan_can_atlas_2018  && \
+git lfs pull -I public/brca_pub  && \
+git lfs pull -I public/brca_pub2015
+git lfs pull -I public/genie  #missing files
+docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal/ -s /mnt/datahub/public/brca_bccrc -o && \
+docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal/ -s /mnt/datahub/public/brca_broad -o && \
+docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal/ -s /mnt/datahub/public/brca_igr_2015 -o && \
+docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal/ -s /mnt/datahub/public/brca_sanger -o && \
+docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal/ -s /mnt/datahub/public/brca_tcga -o && \
+docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal/ -s /mnt/datahub_priv/public/genie -o && \
+docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal/ -s /mnt/datahub/public/brca_metabric -o && \
+docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal/ -s /mnt/datahub/public/brca_tcga_pan_can_atlas_2018 -o && \
+docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal/ -s /mnt/datahub/public/brca_pub -o && \
+docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal/ -s /mnt/datahub/public/brca_pub2015
+
+#merge in updates in datahub
+git pull http://github.com/cbioportal/datahub
+git merge origin HEAD:master
+git push origin master
