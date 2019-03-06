@@ -1,0 +1,23 @@
+### Batch Export Breast Cancer data ###
+=======================================
+
+[mac] ssh -i "~/.ssh/biolinux8_key_pair.pem" ubuntu@ec2-34-222-168-6.us-west-2.compute.amazonaws.com
+[cbio] docker exec -it cbioDB /bin/bash -c "mysql -hcbioDB -ucbio -pP@ssword1 cbioportal"
+[cbio] cat “select sample.patient_id, sample.stable_id, sample.internal_id, sample.type_of_cancer_id, mutation.* from sample left join mutation on sample.internal_id = mutation.sample_id where sample.type_of_cancer_id = ‘brca’ “ > sql/getbrcamutations.sql 
+[cbio] docker exec -it cbioportal-image /bin/bash -c "mysql -hcbioDB -ucbio -pP@ssword1 cbioportal </mnt/datahub/sql/getbrcamutations.sql" >getbrcamutations.out
+
+### Export Copy Number Data of a sample ###
+===========================================
+# Generate a list of sample_id. For each sample_id, e.g. "TCGA-A6-5664" do:
+sql> select substring(sample.stable_id, 1, 12), seg.chr, seg.start, seg.end, seg.num_probes, seg.segment_mean from sample sample left join copy_number_seg seg on sample.internal_id = seg.sample_id where substring(sample.stable_id,1,12) = "TCGA-A6-5664";
+# Dump this table as sample_id.seg.txt
+[cbio] echo "select substring(sample.stable_id, 1, 12) as  sample_id, seg.chr as chr, seg.start as start, seg.end as end, seg.num_probes as num_probes, seg.segment_mean as segment_mean from sample sample left join copy_number_seg seg on sample.internal_id = seg.sample_id  where substring(sample.stable_id,1,12) = \"TCGA-A6-5664\"; " | mysql -ucbio_user -psomepassword -Dcbioportal >TCGA-A6-5664.seg.txt
+
+### Modify cBioPortal to host single cell data ###
+==================================================
+[mac] ssh -i "~/.ssh/biolinux8_key_pair.pem" ubuntu@ec2-18-237-212-193.us-west-2.compute.amazonaws.com #2xlarge, 32GB
+#use above steps to setup a scbio
+#check http://ec2-18-237-212-193.us-west-2.compute.amazonaws.com:8081/cbioportal #worked OK!
+#add single cell data
+[scbio] git lfs pull -I singlecell/skbr3_stanford && \
+[scbio] docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal/ -s /mnt/datahub/singlecell/skbr3_stanford
