@@ -47,6 +47,7 @@ db_runtime_path="${HOME}/setup/cbioportal-docker-runtime"
 db_datahub_path="$HOME/setup/datahub"
 db_datahub_priv_path="$HOME/setup/datahub_priv"
 db_public_studies=('coadread_tcga')
+db_private_studies=()
 
 ### quit to show parameters only ###
 if [ $stage == "dry" ]; then exit; fi
@@ -100,12 +101,6 @@ if [ $stage == 'build_cbio' ]; then
 	docker build --no-cache -t ${docker_cbio_image} -f ${docker_cbio_dockerfile} ${docker_cbio_source}
 fi
 
-### migrate db (optional) ###
-#docker run --rm -it --net cbio-net \
-#    -v /<path_to_config_file>/portal.properties:/cbioportal/portal.properties:ro \
-#    cbioportal-image \
-#    migrate_db.py -p /cbioportal/portal.properties -s /cbioportal/db-scripts/src/main/resources/migration.sql
-
 ### run cbio portal service ###
 if [ $stage == 'run_cbio' ]; then
   docker rm -f ${docker_cbio_instance} || true
@@ -114,20 +109,33 @@ if [ $stage == 'run_cbio' ]; then
     --net=${docker_network} \
     -e TZ="${docker_timezone}" \
     -e CATALINA_OPTS='${docker_cbio_opt}' \
-    -v ${portal_configure_file}:/cbioportal/portal.properties:ro \
     -v ${db_datahub_path}/:/mnt/datahub/ \
     -v ${db_datahub_priv_path}/:/mnt/datahub_priv/ \
     -p ${docker_cbio_port}:8080 \
 		${docker_cbio_image}
+  # property file must be hard copied to container
+  docker cp ${portal_configure_file} ${docker_cbio_instance}:/cbioportal/portal.properties
 fi
 # docker exec -it cbioPortal1 /bin/bash ""
 # docker logs cbioPortal1
 
+### migrate db (optional) ###
+if [ $stage == 'migr_cbio' ]; then
+  docker exec -it ${docker_cbio_instance} bash -c \
+    "migrate_db.py --properties-file /cbioportal/portal.properties \
+    --sql /cbioportal/db-scripts/src/main/resources/migration.sql"
+fi
+
 ### load cbio database ###
 if [ $stage == 'load_cbio' ]; then
   for study in ${db_public_studies[@]}; do
-    docker exec -it ${docker_cbio_instance} \
-      metaImport.py -u http://localhost:8080/cbioportal \
-      -s /mnt/datahub/public/${study} -o
+    docker exec -it ${docker_cbio_instance} bash -c \
+      "metaImport.py -u http://localhost:8080/cbioportal \
+      -s /mnt/datahub/public/${study} -o"
+  done
+  for study in ${db_private_studies[@]}; do
+    docker exec -it ${docker_cbio_instance} bash -c \
+      "metaImport.py -u http://localhost:8080/cbioportal \
+      -s /mnt/datahub_priv/${study} -o"
   done
 fi

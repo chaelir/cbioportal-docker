@@ -1,5 +1,5 @@
-### Add Public data to AWS/Mac ###
-==================================
+### Add Public and Private data to AWS/Mac ###
+==============================================
 
 #install git lfs download data on ubuntu
 [cbio] git lfs pull -I public/crc_msk_2018; \
@@ -57,3 +57,13 @@ docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/c
 git pull http://github.com/cbioportal/datahub
 git merge origin HEAD:master
 git push origin master
+
+#Add Private data to AWS/Mac:
+#FIX: out of space error by grow space
+[cbio] sudo growpart /dev/nvme0n1 1
+[cbio] sudo resize2fs /dev/nvme0n1p1
+#add data folder to datahub/custom, e.g. crc_imh, checkout lfs file, test import and real import by adding -o
+[cbio]  git lfs pull -I custom/crc_imh
+[cbio/mac] docker exec -it cbioportal-image metaImport.py -u http://cbioportal-image:8080/cbioportal/ -s /mnt/datahub/custom/crc_imh
+#check http://cbioportal-image:8081/cbioportal/ works 
+#check http://ec2-34-222-168-6.us-west-2.compute.amazonaws.com:8081/cbioportal #worked OK!
