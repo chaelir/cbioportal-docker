@@ -1,0 +1,45 @@
+rename biosql tables with one script
+===========================================
+
+Import biosql to mysql
+===========================================
+mysqladmin -uroot -ppassword create biosql
+mysql -uroot -ppassword -ve "CREATE USER 'biosql_user'@'localhost' IDENTIFIED BY 'password'"
+mysql -uroot -ppassword -ve "GRANT ALL PRIVILEGES ON biosql.* TO 'biosql_user'@'localhost' IDENTIFIED BY 'password'"
+mysql -uroot -ppassword -ve "FLUSH PRIVILEGES"
+mysql -ubiosql_user -ppassword biosql < biosqldb-mysql.sql
+
+Populate biosql with NCBI taxonomy
+===========================================
+[mac] brew install openssl mysql-connector-c
+[mac] cpan install DBD::mysql
+git clone https://github.com/chaelir/biosql.git
+
+Rename tables in biosql.* by immube.biosql_*
+===========================================
+
+
+Import immube.biosql_* to cbioportal 
+===========================================
+
+docker run --rm \
+  --name=load-biosql \
+  --net=cbio_net \
+  -e MYSQL_USER=cbio \
+  -e MYSQL_PASSWORD=P@ssword1 \
+  -v /${CBIO_DATAPRIV}:/mnt \
+  mysql:5.7.22 \
+  sh -c 'cat /mnt/query/biosqldb-mysql.sql | mysql -hcbioDB -ucbio -pP@ssword1 cbioportal'
+
+1. Add NCBI TAXONOMY DATABASE TO CBIOPORTAL
+	1. ~/setup/datahub_priv/taxonomy
+	2. ~/setup/datahub_priv/query
+	3. BioSQL: https://biosql.org/wiki/Downloads
+	4. BioSQL: https://github.com/biosql/biosql.github.io/blob/master/wiki/Main_Page.md
+	5. Lineager: https://vimal.io/lineager/
+	
+Populate these two tables:
+2. Create: microbe_profile (microbe_profile_id, stable_id, cancer_study_id, microbe_alteration_type, data_type, name, description)
+3. Create: microbe_alteration (microbe_profile_id, taxon_id, values(N=samples))
+4. Modify: write import code （core/src/main/scripts/importer/cbioportal_common.py） to populate these tables
+Modify: front end code to display these tables
