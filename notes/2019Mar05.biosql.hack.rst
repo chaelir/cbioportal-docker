@@ -46,8 +46,6 @@ Connecting cBioPortal to BioSeq
          genetic_entity_id -> microbe_entity_id 
 3. Create IM_microbe_entity like genetic_entity:
          ID(microbe_entity_id) -> MICROBE (i.e. BS_taxon.taxon_id)
-3. Create IM_microbe_entity like genetic_entity:
-         ID(cell_entity_id) -> CELL
 5. Create IM_microbe like gene
 				 Entrez_gene_id -> ncbi_taxon_id (i.e. BS_taxon.ncbi_taxon_id)
 				 Hugo_gene_symbol -> ncbi_taxon_name (i.e. BS_taxon_name.name)
@@ -55,6 +53,8 @@ Connecting cBioPortal to BioSeq
          cytoband -> taxon_level (i.e. BS_taxon.node_rank)
          type,
          length,
+3. Create IM_microbe_entity like genetic_entity:
+         ID(cell_entity_id) -> CELL
 4. Create IM_cell_alteration like genetic_alteration:
          genetic_profile_id -> cell_profile_id
          genetic_entity_id -> cell_entity_id 

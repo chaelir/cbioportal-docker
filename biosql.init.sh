@@ -4,7 +4,7 @@
 #===========================================
 
 set -x
-if [ -z $1 ]; then biosql_dump_sql="BS_tables_export.sql"; else biosql_dump_sql=$1; fi;
+if [ -z $1 ]; then biosql_dump_sql="BS_tables.dump.sql"; else biosql_dump_sql=$1; fi;
 biosql_source="https://github.com/chaelir/biosql.git"
 mysql_root_password="password"
 
@@ -20,7 +20,7 @@ cd ..
 
 #Creat biosql in mysql
 #===========================================
-mysql -uroot -p${mysql_root_password} -ve "DROP biosql; CREATE DATABASE biosql"
+mysql -uroot -p${mysql_root_password} -ve "DROP DATABASE IF EXISTS biosql; CREATE DATABASE biosql"
 mysql -uroot -p${mysql_root_password} -ve "CREATE USER 'biosql_user'@'localhost' IDENTIFIED BY 'password'"
 mysql -uroot -p${mysql_root_password} -ve "GRANT ALL PRIVILEGES ON biosql.* TO 'biosql_user'@'localhost' IDENTIFIED BY 'password'"
 mysql -uroot -p${mysql_root_password} -ve "FLUSH PRIVILEGES"

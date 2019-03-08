@@ -11,7 +11,8 @@ portal_configure_template="$HOME/setup/cbioportal-docker/portal.properties"
 portal_configure_file="$HOME/setup/cbioportal-docker/portal.properties.cbioportal1"
 docker_template="$HOME/setup/cbioportal-docker/Dockerfile"
 docker_file="$HOME/setup/cbioportal-docker/Dockerfile.v1.17"
-biosql_dump_sql="$HOME/setup/cbioportal-docker/BS_tables_export.sql"
+biosql_dump_sql="$HOME/setup/cbioportal-docker/BS_tables.dump.sql"
+cellpedia_dump_sql="$HOME/setup/cbioportal-docker/CP_tables.dump.sql"
 cp -f ${portal_configure_template} ${portal_configure_file}
 cp -f ${docker_template} ${docker_file}
 
@@ -145,9 +146,28 @@ fi
 if [ $stage == 'prep_biosql' ]; then
   ./biosql.init.sh ${biosql_dump_sql}
 fi
+# fully automatic
 
 ### add BS database ###
 if [ $stage == 'load_biosql' ]; then
+  docker run \
+    --net=${docker_network} \
+    -e TZ="${docker_timezone}" \
+    -e MYSQL_USER=${db_user} \
+    -e MYSQL_PASSWORD=${db_password} \
+    -v ${biosql_dump_sql}:/mnt/biosql.dump.sql:ro \
+    mysql:5.7 \
+    sh -c "cat /mnt/biosql.dump.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
+fi
+
+### prepare CP database ###
+if [ $stage == 'prep_cellpedia' ]; then
+  #./cellpedia.init.sh ${cellpedia_dump_sql}
+fi
+# TODO: fullly automize this step
+
+### add BS database ###
+if [ $stage == 'load_cellpedia' ]; then
   docker run \
     --net=${docker_network} \
     -e TZ="${docker_timezone}" \
