@@ -16,6 +16,7 @@ cellpedia_dump_sql="$HOME/setup/cbioportal-docker/CP_tables.dump.sql"
 immube_dump_sql="$HOME/setup/cbioportal-docker/IM_tables.dump.sql"
 cp -f ${portal_configure_template} ${portal_configure_file}
 cp -f ${docker_template} ${docker_file}
+/Users/charlie/setup/cbioportal-docker/cbioportal/core/src/main/scripts/importer
 
 ### current configurable portal.properties variables ###
 # for Bash compatibility, changed variable names x.y to x_y
