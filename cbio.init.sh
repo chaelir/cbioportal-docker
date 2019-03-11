@@ -36,7 +36,10 @@ sed -i -e "s/db.portal_db_name=.*/db.portal_db_name=${db_portal_db_name}/g" ${po
 docker_timezone="America/Los_Angeles"
 docker_restart="always"
 docker_network="cbio-net1"
-docker_cbio_source="." #currently at v1.17
+docker_cbio_source="."            
+#local git source folder of cbioportal-docker
+cbioportal_source="-b v1.17.1+backport4787-4917-5057 https://github.com/thehyve/cbioportal.git cbioportal"
+#local git source folder of cbioportal, at v1.17.1 
 docker_cbio_image="cbioportal-v1.17"
 docker_cbio_instance="cbioPortal1"
 docker_cbio_dockerfile="Dockerfile.v1.17" #this points to tags in 
@@ -101,7 +104,11 @@ fi
 ### build cbioportal docker image
 if [ $stage == 'build_cbio' ]; then
 # adding --no-cache is important to avoid cannot fetch errors from apt-get
-	docker build --no-cache -t ${docker_cbio_image} -f ${docker_cbio_dockerfile} ${docker_cbio_source}
+  git clone ${cbioportal_source}
+	#docker build --no-cache -t ${docker_cbio_image} -f ${docker_cbio_dockerfile} ${docker_cbio_source}
+  #you will need --no-cache if you haven't build a thing for a while to avoid apt source not found errors...
+	docker build -t ${docker_cbio_image} -f ${docker_cbio_dockerfile} ${docker_cbio_source}
+  exit
 fi
 
 ### run cbio portal service ###
