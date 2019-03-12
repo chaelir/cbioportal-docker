@@ -13,10 +13,10 @@ docker_template="$HOME/setup/cbioportal-docker/Dockerfile"
 docker_file="$HOME/setup/cbioportal-docker/Dockerfile.v1.17"
 biosql_dump_sql="$HOME/setup/cbioportal-docker/BS_tables.dump.sql"
 cellpedia_dump_sql="$HOME/setup/cbioportal-docker/CP_tables.dump.sql"
-immube_dump_sql="$HOME/setup/cbioportal-docker/IM_tables.dump.sql"
+microbe_dump_sql="$HOME/setup/cbioportal-docker/IM_microbe.dump.sql"
+cell_dump_sql="$HOME/setup/cbioportal-docker/IM_cell.dump.sql"
 cp -f ${portal_configure_template} ${portal_configure_file}
 cp -f ${docker_template} ${docker_file}
-/Users/charlie/setup/cbioportal-docker/cbioportal/core/src/main/scripts/importer
 
 ### current configurable portal.properties variables ###
 # for Bash compatibility, changed variable names x.y to x_y
@@ -45,6 +45,7 @@ docker_cbio_image="cbioportal-v1.17"
 docker_cbio_instance="cbioPortal1"
 docker_cbio_dockerfile="Dockerfile.v1.17" #this points to tags in 
 docker_cbio_port=8881
+docker_mysql_port=3337
 docker_cbio_opt="'-Xms2g -Xmx4g'" #tricky quote issue, important to preserve quote this way
 docker_db_wait=10
 db_dataseed_path="${HOME}/setup/datahub/seedDB"
@@ -78,6 +79,7 @@ if [ $stage == 'run_mysql' ]; then
     -v ${db_runtime_path}/${db_host}:/var/lib/mysql/ \
     -v ${db_datahub_path}/:/mnt/datahub/ \
     -v ${db_datahub_priv_path}/:/mnt/datahub_priv/ \
+    -p ${docker_mysql_port}:3306 \
     mysql:5.7
   ### run mysql with seed database ###
   echo "Take Note: access the mysql db with the following command:"
@@ -171,30 +173,45 @@ fi
 
 ### prepare CP database ###
 if [ $stage == 'prep_cellpedia' ]; then
+  echo '...' 
   #./cellpedia.init.sh ${cellpedia_dump_sql}
 fi
 # TODO: fullly automize this step
 
 ### add CP database ###
 if [ $stage == 'load_cellpedia' ]; then
+  echo '...' 
   docker run \
     --net=${docker_network} \
     -e TZ="${docker_timezone}" \
     -e MYSQL_USER=${db_user} \
     -e MYSQL_PASSWORD=${db_password} \
-    -v ${biosql_dump_sql}:/mnt/biosql.dump.sql:ro \
+    -v ${cellpedia_dump_sql}:/mnt/cellpedia.dump.sql:ro \
     mysql:5.7 \
-    sh -c "cat /mnt/biosql.dump.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
+    sh -c "cat /mnt/cellpedia.dump.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
 fi
 
 ### add MI database
-if [ $stage == 'load_immube' ]; then
+if [ $stage == 'load_microbe' ]; then
+  echo '...' 
   docker run \
     --net=${docker_network} \
     -e TZ="${docker_timezone}" \
     -e MYSQL_USER=${db_user} \
     -e MYSQL_PASSWORD=${db_password} \
-    -v ${immube_dump_sql}:/mnt/immube.dump.sql:ro \
+    -v ${microbe_dump_sql}:/mnt/microbe.dump.sql:ro \
     mysql:5.7 \
-    sh -c "cat /mnt/immube.dump.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
+    sh -c "cat /mnt/microbe.dump.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
+fi
+
+if [ $stage == 'load_cell' ]; then
+  echo '...' 
+  docker run \
+    --net=${docker_network} \
+    -e TZ="${docker_timezone}" \
+    -e MYSQL_USER=${db_user} \
+    -e MYSQL_PASSWORD=${db_password} \
+    -v ${cell_dump_sql}:/mnt/cell.dump.sql:ro \
+    mysql:5.7 \
+    sh -c "cat /mnt/cell.dump.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
 fi
