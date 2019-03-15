@@ -15,6 +15,9 @@
 --          genetic_profile_id -> cell_profile_id,
 --          genetic_alteration_type -> cell_alteration_type,
 --          stable_id,
+-- 2.5. Create IM_cell_alias like gene_alias:
+--          Entrez_gene_id -> unique_cell_id
+--					gene_alias -> cell_alias
 */
 
 /* create necessary tables */
@@ -26,6 +29,7 @@ DROP TABLE IF EXISTS `IM_cell`;
 DROP TABLE IF EXISTS `IM_cell_entity`;
 DROP TABLE IF EXISTS `IM_cell_profile`;
 DROP TABLE IF EXISTS `IM_cell_alteration`;
+DROP TABLE IF EXISTS `IM_cell_alias`;
 
 -- ----------------------------
 --  Table structure for `IM_cell_entity`
@@ -44,15 +48,15 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- ----------------------------
 DROP TABLE IF EXISTS `IM_cell`;
 CREATE TABLE `IM_cell` (
-  `CELLPEDIA_CELL_TYPE_ID` int(11) NOT NULL DEFAULT -1,
-  `CELLPEDIA_CELL_TYPE_NAME` varchar(255) NOT NULL DEFAULT '',
+  `UNIQUE_CELL_ID` int(11) NOT NULL DEFAULT -1,
+  `UNIQUE_CELL_NAME` varchar(255) NOT NULL DEFAULT '',
   `CELL_ENTITY_ID` int(11) NOT NULL DEFAULT -1,
   `TYPE` varchar(50) DEFAULT NULL,
   `ORGAN` varchar(64) DEFAULT NULL,
   `LENGTH` int(11) DEFAULT NULL,
   PRIMARY KEY (`CELL_ENTITY_ID`),
-  UNIQUE KEY `CELL_ENTITY_ID_UNIQUE` (`CELL_ENTITY_ID`),
-  KEY `CELLPEDIA_CELL_TYPE_NAME` (`CELLPEDIA_CELL_TYPE_NAME`),
+  UNIQUE KEY `UNIQUE_CELL_ID` (`UNIQUE_CELL_ID`),
+  KEY `UNIQUE_CELL_NAME` (`UNIQUE_CELL_NAME`),
   CONSTRAINT `im_cell_ibfk_1` FOREIGN KEY (`CELL_ENTITY_ID`) REFERENCES `IM_cell_entity` (`ID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -95,6 +99,17 @@ CREATE TABLE `IM_cell_alteration` (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+-- ----------------------------
+--  Table structure for `IM_cell_alias`
+-- ----------------------------
+DROP TABLE IF EXISTS `IM_cell_alias`;
+CREATE TABLE `IM_cell_alias` (
+  `UNIQUE_CELL_ID` int(11) NOT NULL, 
+  `CELL_ALIAS` varchar(255) NOT NULL,
+  PRIMARY KEY (`UNIQUE_CELL_ID`,`CELL_ALIAS`),
+  CONSTRAINT `cell_alias_ibfk_1` FOREIGN KEY (`UNIQUE_CELL_ID`) REFERENCES `IM_cell` (`UNIQUE_CELL_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 /* populate cell entries from CP */
 
 -- cell_entity
@@ -108,7 +123,7 @@ select CONVERT(Cell_ID, SIGNED) from CP_differentiated;
 -- cell
 UPDATE IM_cell
 INNER JOIN CP_differentiated ON (IM_cell.Cell_Entity_ID = CONVERT(CP_differentiated.Cell_ID, SIGNED))
-SET IM_cell.CELLPEDIA_CELL_TYPE_ID = CP_differentiated.Cell_Type_ID;
+SET IM_cell.UNIQUE_CELL_ID = CP_differentiated.Cell_Type_ID;
 
 UPDATE IM_cell
 INNER JOIN CP_differentiated ON (IM_cell.Cell_Entity_ID = CONVERT(CP_differentiated.Cell_ID, SIGNED))

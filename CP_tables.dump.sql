@@ -22,8 +22,9 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 DROP TABLE IF EXISTS `CP_anatomy`;
 CREATE TABLE `CP_anatomy` (
-  `Previous_Anatomy_ID` varchar(255) NOT NULL,
-  `Anatomy_ID` varchar(255) DEFAULT NULL,
+  `ANATOMY_ID` varchar(255) NOT NULL,
+  `Previous_Anatomy_ID` varchar(255) DEFAULT NULL,
+  `Current_Anatomy_ID` varchar(255) DEFAULT NULL,
   `Body_Part` varchar(255) DEFAULT NULL,
   `Organ` varchar(255) DEFAULT NULL,
   `Sub_Organ` varchar(255) DEFAULT NULL,
@@ -35,8 +36,8 @@ CREATE TABLE `CP_anatomy` (
   `Tissue_5_2` varchar(255) DEFAULT NULL,
   `Tissue_5_3` varchar(255) DEFAULT NULL,
   `Tissue_5_4` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`Previous_Anatomy_ID`),
-  KEY `Anatomy_ID` (`Anatomy_ID`)
+  PRIMARY KEY (`ANATOMY_ID`),
+  KEY `ANATOMY_ID` (`ANATOMY_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------

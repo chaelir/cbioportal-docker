@@ -3,6 +3,7 @@ set -x
 stage=$1
 
 if [ $stage == "get_cp" ]; then 
+  cd archive
   #get necessary commandline tools
   brew install html-xml-utils #for htmlutils on mac: https://www.w3.org/Tools/HTML-XML-utils/README
   brew install gnumeric #for convert xlsx to csv on mac: http://www.gnumeric.org
@@ -21,7 +22,8 @@ if [ $stage == "get_cp" ]; then
   # convert to standard csv files to imported to mysql
   ssconvert -T Gnumeric_stf:stf_assistant \
     -O 'separator=, format=raw quoting-mode=never' \
-    cellpedia.anatomy.xlsx cellpedia.anatomy.csv
+    cellpedia.anatomy.xlsx cellpedia.anatomy.csv # this table used parenthesis in column name
+  sed -i -e '1,1s/([^()]*)//g' cellpedia.anatomy.csv # fix it!
   ssconvert -T Gnumeric_stf:stf_assistant \
     -O 'separator=, format=raw quoting-mode=never' \
     cellpedia.celltype.xlsx cellpedia.celltype.csv
@@ -29,18 +31,16 @@ if [ $stage == "get_cp" ]; then
   cp cellpedia.differentiated.html cellpedia.differentiated.xls
   ssconvert -T Gnumeric_stf:stf_assistant \
     -O 'separator=; format=raw quoting-mode=never' \
-    cellpedia.differentiated.xls cellpedia.differentiated.txt #semi colon seperated values
-  sed 's/,/ /g' cellpedia.differentiated.txt | sed 's/;/,/g' >cellpedia.differentiated.csv 
+    cellpedia.differentiated.xls cellpedia.differentiated.txt # this table used semi colon seperated values
+  sed 's/,/ /g' cellpedia.differentiated.txt | sed 's/;/,/g' >cellpedia.differentiated.csv # fix it! 
   #MANUAL: load cellpedia.differentiated.csv in MS excel, correct the header rows and anatomy id and save it
+  cd ..
 fi
 
 #for now, need to manually operate in navicat to prepare the tables and dump 
 
-if [ $stage == "prep_cp" ]; then 
-  mysql_root_password="password"
-  mysql -uroot -p${mysql_root_password} -ve "DROP DATABASE IF EXISTS cellpedia; CREATE DATABASE cellpedia"
-  mysql -uroot -p${mysql_root_password} -ve "CREATE USER 'cellpedia_user'@'localhost' IDENTIFIED BY 'password'"
-  mysql -uroot -p${mysql_root_password} -ve "GRANT ALL PRIVILEGES ON cellpedia.* TO 'cellpedia_user'@'localhost' IDENTIFIED BY 'password'"
-  mysql -uroot -p${mysql_root_password} -ve "FLUSH PRIVILEGES"
-  #MANUAL: load cellpedia.*.csv to navicat, set primariy keys, foreign keys and export as CP_tables.dump.sql
+if [ $stage == "pop_cp" ]; then 
+  mkdir cellpedia || true 
+  chmod +x ./CP.clean.R
+  ./CP.clean.R
 fi
