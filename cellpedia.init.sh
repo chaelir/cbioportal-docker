@@ -37,10 +37,33 @@ if [ $stage == "get_cp" ]; then
   cd ..
 fi
 
-#for now, need to manually operate in navicat to prepare the tables and dump 
-
-if [ $stage == "pop_cp" ]; then 
-  mkdir cellpedia || true 
-  chmod +x ./CP.clean.R
-  ./CP.clean.R
+### testing if CP could be created correctly
+if [ $stage == "test_cp" ]; then 
+  #mysql_root_password="password"
+  #CP_tables_init_sql="CP_tables.init.sql"
+  mysql -uroot -ppassword -ve "DROP DATABASE IF EXISTS cellpedia; CREATE DATABASE cellpedia"
+  mysql -uroot -ppassword -ve "CREATE USER 'cellpedia_user'@'localhost' IDENTIFIED BY 'password'"
+  mysql -uroot -ppassword -ve "GRANT ALL PRIVILEGES ON cellpedia.* TO 'cellpedia_user'@'localhost' IDENTIFIED BY 'password'"
+  mysql -uroot -ppassword -ve "FLUSH PRIVILEGES"
+  mysql -ucellpedia_user -ppassword cellpedia <CP_tables.init.sql
+  #The LOCAL keyword is important to avoid access denied issue for loading.
+  mysql -ucellpedia_user -ppassword cellpedia -ve "
+    LOAD DATA LOCAL INFILE 'cellpedia/CP_anatomy.csv'
+		INTO TABLE CP_anatomy 
+    FIELDS TERMINATED BY ',' 
+    LINES TERMINATED BY '\n'
+    IGNORE 1 ROWS;"
+  mysql -ucellpedia_user -ppassword cellpedia -ve "
+    LOAD DATA LOCAL INFILE 'cellpedia/CP_celltype.csv'
+		INTO TABLE CP_celltype 
+    FIELDS TERMINATED BY ',' 
+    LINES TERMINATED BY '\n'
+    IGNORE 1 ROWS;"
+  mysql -ucellpedia_user -ppassword cellpedia -ve "
+    LOAD DATA LOCAL INFILE 'cellpedia/CP_cell.csv'
+		INTO TABLE CP_cell
+    FIELDS TERMINATED BY ',' 
+    LINES TERMINATED BY '\n'
+    IGNORE 1 ROWS;"
 fi
+###

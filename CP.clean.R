@@ -42,19 +42,19 @@ CP_anatomy = cbind(CP_anatomy, cellpedia_anatomy)
 colnames(CP_anatomy)
 CP_anatomy = CP_anatomy %>% 
   dplyr::group_by(ANATOMY_ID) %>% 
-  summarise(`Previous Anatomy ID` = paste(`Previous Anatomy ID`, collapse="|"),
-            `Current Anatomy ID` = paste(`Current Anatomy ID`, collapse="|"),
-            `Body part` = paste(`Body part`, collapse="|"),
-            `Organ` = paste(`Organ`, collapse="|"),
-            `Sub-organ` = paste(`Sub-organ`, collapse="|"),
-            `Tissue 1` = paste(`Tissue 1`, collapse="|"),
-            `Tissue 2` = paste(`Tissue 2`, collapse="|"),
-            `Tissue 3` = paste(`Tissue 3`, collapse="|"),
-            `Tissue 4` = paste(`Tissue 4`, collapse="|"),
-            `Tissue 5-1` = paste(`Tissue 5-1`, collapse="|"),
-            `Tissue 5-2` = paste(`Tissue 5-2`, collapse="|"),
-            `Tissue 5-3` = paste(`Tissue 5-3`, collapse="|"),
-            `Tissue 5-4` = paste(`Tissue 5-4`, collapse="|"))
+  summarise(`Previous Anatomy ID` = paste(unique(`Previous Anatomy ID`), collapse="|"),
+            `Current Anatomy ID` = paste(unique(`Current Anatomy ID`), collapse="|"),
+            `Body part` = paste(unique(`Body part`), collapse="|"),
+            `Organ` = paste(unique(`Organ`), collapse="|"),
+            `Sub-organ` = paste(unique(`Sub-organ`), collapse="|"),
+            `Tissue 1` = paste(unique(`Tissue 1`), collapse="|"),
+            `Tissue 2` = paste(unique(`Tissue 2`), collapse="|"),
+            `Tissue 3` = paste(unique(`Tissue 3`), collapse="|"),
+            `Tissue 4` = paste(unique(`Tissue 4`), collapse="|"),
+            `Tissue 5-1` = paste(unique(`Tissue 5-1`), collapse="|"),
+            `Tissue 5-2` = paste(unique(`Tissue 5-2`), collapse="|"),
+            `Tissue 5-3` = paste(unique(`Tissue 5-3`), collapse="|"),
+            `Tissue 5-4` = paste(unique(`Tissue 5-4`), collapse="|"))
 # colnames(CP_anatomy)
 # [1] "ANATOMY_ID"          "Previous Anatomy ID" "Current Anatomy ID"  "Body part"           "Organ"              
 # [6] "Sub-organ"           "Tissue 1"            "Tissue 2"            "Tissue 3"            "Tissue 4"           
@@ -115,7 +115,10 @@ CP_cell = CP_cell %>%
   filter(ANATOMY_ID %in% CP_anatomy$ANATOMY_ID) %>%
   filter(CELL_TYPE_ID %in% CP_celltype$CELL_TYPE_ID) %>%
   select(-c(CPID)) %>%
-  plyr::rename(c("No." = "CPID"))
+  plyr::rename(c("No." = "CPID")) %>%
+  plyr::rename(c("Anatomy Id" = "Raw Anatomy Id")) %>%
+  plyr::rename(c("Cell Type Id" = "Raw Cell Type Id")) %>%
+  select(-c(Organ))
   
 # remove inconsistent entries 
 # sel=!CP_cell$ANATOMY_ID %in% CP_anatomy$ANATOMY_ID
