@@ -86,7 +86,6 @@ CP_celltype = CP_celltype %>%
 stopifnot(assertthat::are_equal(length(CP_celltype$CELL_TYPE_ID), length(unique(CP_celltype$CELL_TYPE_ID))))
 stopifnot(assertthat::are_equal(length(CP_celltype$CELL_TYPE_NAME), length(unique(CP_celltype$CELL_TYPE_NAME))))
 
-
 # CP_cell
 # CPID is primary key and unique;
 # UNIQUE_CELL_ID is unique; 
@@ -138,4 +137,3 @@ write.table(CP_celltype, file='~/setup/cbioportal-docker/cellpedia/CP_celltype.c
 write.table(CP_anatomy, file='~/setup/cbioportal-docker/cellpedia/CP_anatomy.csv', 
             quote = F, col.names = T, row.names = F, sep=',')
 # these CP csv files will be used to populate CP tables and dumped to cellpedia.dump.sql
-

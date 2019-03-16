@@ -58,14 +58,10 @@ write.table(grammy_export, file='~/setup/cbioportal-docker/example/testing/data_
             quote = F, col.names = T, row.names = F, sep='\t')
 
 
-
 # in IM_cell and IM_microbe, 
 # we must require NCBI_TAXON_NAME and NCBI_TAXON_ID fields unique
 
-
-
-
-### DEBUG PROCESS (DATA LOADING):
+### CP DEBUG PROCESS (DATA LOADING):
 # 1. fix existing MI_cell table 
 #   1.1 rename CELLPEDIA_CELL_TYPE_NAME -> UNIQUE_CELL_NAME; use _ concatenated name
 #   1.2 rename CELLPEDIA_CELL_TYPE_ID -> UNIQUE_CELL_ID; use x100+subs
