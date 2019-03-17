@@ -12,7 +12,7 @@ portal_configure_template="$HOME/setup/cbioportal-docker/portal.properties"
 portal_configure_file="$HOME/setup/cbioportal-docker/portal.properties.cbioportal1"
 docker_template="$HOME/setup/cbioportal-docker/Dockerfile"
 docker_file="$HOME/setup/cbioportal-docker/Dockerfile.v1.17"
-biosql_dump_sql="$HOME/setup/cbioportal-docker/BS_tables.dump.sql"
+biosql_init_sql="$HOME/setup/cbioportal-docker/BS_tables.init.sql"
 cellpedia_init_sql="$HOME/setup/cbioportal-docker/CP_tables.init.sql"
 cellpedia_tables=('CP_anatomy' 'CP_celltype' 'CP_cell')
 microbe_init_sql="$HOME/setup/cbioportal-docker/IM_microbe.init.sql"
@@ -157,7 +157,7 @@ fi
 
 ### prepare BS database ###
 if [ $stage == 'prep_biosql' ]; then
-  ./biosql.init.sh ${biosql_dump_sql}
+  ./biosql.init.sh ${biosql_init_sql}
 fi
 # fully automatic
 
@@ -168,9 +168,9 @@ if [ $stage == 'load_BS' ]; then
     -e TZ="${docker_timezone}" \
     -e MYSQL_USER=${db_user} \
     -e MYSQL_PASSWORD=${db_password} \
-    -v ${biosql_dump_sql}:/mnt/biosql.dump.sql:ro \
+    -v ${biosql_init_sql}:/mnt/biosql.init.sql:ro \
     mysql:5.7 \
-    sh -c "cat /mnt/biosql.dump.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
+    sh -c "cat /mnt/biosql.init.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
 fi
 
 ### prepare CP database ###
@@ -188,9 +188,9 @@ if [ $stage == 'load_CP' ]; then
     -e TZ="${docker_timezone}" \
     -e MYSQL_USER=${db_user} \
     -e MYSQL_PASSWORD=${db_password} \
-    -v ${cellpedia_init_sql}:/mnt/cellpedia.dump.sql:ro \
+    -v ${cellpedia_init_sql}:/mnt/cellpedia.init.sql:ro \
     mysql:5.7 \
-    sh -c "cat /mnt/cellpedia.dump.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
+    sh -c "cat /mnt/cellpedia.init.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
   for tab in ${cellpedia_tables[@]}; do
     docker run \
     --net=${docker_network} \
@@ -214,9 +214,9 @@ if [ $stage == 'load_MI_cell' ]; then
   docker run \
     --net=${docker_network} \
     -e TZ="${docker_timezone}" \
-    -v ${cell_init_sql}:/mnt/cell.dump.sql:ro \
+    -v ${cell_init_sql}:/mnt/cell.init.sql:ro \
     mysql:5.7 \
-    sh -c "cat /mnt/cell.dump.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
+    sh -c "cat /mnt/cell.init.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
 fi
 
 ### load MI database
@@ -227,7 +227,7 @@ if [ $stage == 'load_MI_microbe' ]; then
     -e TZ="${docker_timezone}" \
     -e MYSQL_USER=${db_user} \
     -e MYSQL_PASSWORD=${db_password} \
-    -v ${microbe_init_sql}:/mnt/.dump.sql:ro \
+    -v ${microbe_init_sql}:/mnt/.init.sql:ro \
     mysql:5.7 \
-    sh -c "cat /mnt/microbe.dump.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
+    sh -c "cat /mnt/microbe.init.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
 fi

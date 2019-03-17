@@ -62,11 +62,11 @@ write.table(grammy_export, file='~/setup/cbioportal-docker/example/testing/data_
 # we must require NCBI_TAXON_NAME and NCBI_TAXON_ID fields unique
 
 ### CP DEBUG PROCESS (DATA LOADING):
-# 1. fix existing MI_cell table 
+# 1. fix existing MI_cell tables [DONE] 
 #   1.1 rename CELLPEDIA_CELL_TYPE_NAME -> UNIQUE_CELL_NAME; use _ concatenated name
 #   1.2 rename CELLPEDIA_CELL_TYPE_ID -> UNIQUE_CELL_ID; use x100+subs
 #   1.3 TYPE should contain current CELLPEDIA_CELL_TYPE_ID
-# 2. add cell_alias table
+# 2. add cell_alias table [DONE]
 #   2.1 cell_alias
 # 3. visually check all modified files
 #   3.1 check model/*Cell*.java: 
