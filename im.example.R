@@ -5,7 +5,7 @@ data_bcr_clinical_data_sample <- read_delim("~/setup/cbioportal-docker/example/d
                                             "\t", escape_double = FALSE, comment = "#", 
                                             trim_ws = TRUE)
 
-cibersort_raw <- read_csv("~/setup/cbioportal-docker/cibersort.csv")
+cibersort_raw <- read_csv("~/setup/cbioportal-docker/archive/cibersort.csv")
 #View(cibersort_raw)
 cibersort_clean = cibersort_raw %>% mutate(SampleID = substring(SampleID, 1,16)) %>%
   mutate(SampleID = gsub("\\.","-",SampleID)) %>%
@@ -43,7 +43,7 @@ write.table(cibersort_export, file='~/setup/cbioportal-docker/example/testing/da
 # 2. create example/meta_linear_MRA.txt;
 # 3. apply patches to cbioportal/core/src/main/scripts/importer/*
 
-grammy_raw <- read_csv("~/setup/cbioportal-docker/guo_results_sum.csv")
+grammy_raw <- read_csv("~/setup/cbioportal-docker/archive/guo_results_sum.csv")
 grammy_sample_ids = stringr::str_extract(grammy_raw$ID, "TCGA-.{2}-.{4}-.{2}") #TCGA-AA-3516-01
 microbe_im_ids = colnames(grammy_raw)[1:(ncol(grammy_raw)-1)]
 grammy_export = tibble::as_tibble(t(grammy_raw[,1:(ncol(grammy_raw)-1)])) #254 samples
@@ -66,16 +66,44 @@ write.table(grammy_export, file='~/setup/cbioportal-docker/example/testing/data_
 #   1.1 rename CELLPEDIA_CELL_TYPE_NAME -> UNIQUE_CELL_NAME; use _ concatenated name
 #   1.2 rename CELLPEDIA_CELL_TYPE_ID -> UNIQUE_CELL_ID; use x100+subs
 #   1.3 TYPE should contain current CELLPEDIA_CELL_TYPE_ID
+
 # 2. add cell_alias table [DONE]
 #   2.1 cell_alias
+
 # 3. visually check all modified files
-#   3.1 check model/*Cell*.java: 
-#       CanonicalCell.java       Cell.java                CellAlterationType.java  CellProfile.java
-# 4. scripts/ImportCellProfileData.java
-#   4.1 check it, compile it with libraries in model
-#   4.2 run it and check database change
+#   3.1 check cbioportal/core/src/main/java/org/mskcc/cbio/portal/model/*Cell*.java: 
+#       CanonicalCell.java              Cell.java                    CellAlterationType.java        CellProfile.java
+#   3.2 check cbioportal/core/src/main/java/org/mskcc/cbio/portal/model/*Cell*.java: 
+#       ImportCellProfileData.java      ExportCellProfileData.java 
+
+# 4. test model and scripts using cbio.hack.sh test core
+#   4.1 DaoTextCache error:
+#       reproduce the error: 
+text1 = "even a single character change should make a big difference"
+key1 = digest::digest(text1)
+text2 = 'even a single character chance should make a big difference'
+key2 = digest::digest(text2)
+# -- The following does not do intended
+# INSERT INTO text_cache (`HASH_KEY`, `TEXT`, `DATE_TIME_STAMP`) VALUES (
+#   "2d04e7da5e789aa73765c1fd5b6d2866",
+#   "even a single character change should make a big difference",
+#   NOW());
+# INSERT INTO text_cache (`HASH_KEY`, `TEXT`, `DATE_TIME_STAMP`) VALUES (
+#   "86e9937bd5280f9638515d82a6e2f081",
+#   "even a single character chance should make a big difference",
+#   NOW());
+# DELETE FROM text_cache WHERE `DATE_TIME_STAMP` <= 20190317124600;
+# -- Problem is default time zone different between mysql and system
+# SELECT @@global.time_zone, @@session.time_zone;
+# -- Permanent fix
+# -- cat "[mysqld] \n default-time-zone='+08:00'" > ~/.my.cnf
+# -- Temporary fix
+# -- SET GLOBAL time_zone = '+8:00';
+
+
 # 5. try scripts/metaImport.py
 #   5.1 run it and check database change
+
 
 ### DEBUG PROCESS (DATA PRESENTATION):
 # 1. add a Cell Composition view http://localhost:8881/cbioportal/study?id=coadread_tcga#cra
