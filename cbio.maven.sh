@@ -2,14 +2,14 @@
 
 # perform maven build of cbio portal
 
-# cbio.maven.sh goal module sub-goal
+# cbio.maven.sh goal module opt
 # e.g. 
 # cbio.maven.sh prep_db
 # cbio.maven.sh python-validator
 # cbio.maven.sh prep_dep security
 # cbio.maven.sh prep_dep security
-# cbio.maven.sh test core
-# cbio.maven.sh install core install-file
+# cbio.maven.sh test persistence-mybatis
+# cbio.maven.sh test core -Dtest=TestDaoTextCache
 
 # never run, for copy and paste only
 # install individual dependency if overall test breaks for the target org.mskcc.cbio:core
@@ -20,7 +20,6 @@ if [[ "1" == "2" ]]; then
       -Ddb.user=cbio_user \
       -Ddb.password=somepassword \
       -rf :core
-      -X
 fi
 
 set -x
@@ -72,16 +71,31 @@ else
   mkdir -p .m2
   cp .travis/settings.xml .m2
   PROFILE="charlie"
+  GOAL=$1
 
-  if [[ -z $3 ]]; then GOAL="$1"; else GOAL="$1:$3"; fi
-  if [[ $2 == "master" ]]; then MODULE=""; else MODULE=":$2"; pushd $2; fi
+  if [[ $2 == "master" ]]; then 
+    MODULE=""
+  else 
+    if [[ $2 == "db-scripts" ]]; then 
+      pushd $2;
+      #MODULE=":$2"
+    else
+      SUBDIR=$(echo $2 | cut -d '-' -f 1)
+      pushd $SUBDIR/$2; 
+    fi
+    OPT=$3
+  fi
   mvn -e \
       -P${PROFILE} \
       -Dfinal.war.name=cbioportal \
       -Ddb.user=cbio_user \
       -Ddb.password=somepassword \
-      $GOAL $MODULE
-  if [[ $2 != "master" ]]; then popd; fi
+      ${OPT} \
+      ${GOAL}
+  if [[ $2 != "master" ]]; then 
+      popd; 
+      continue
+  fi
    
   popd
 fi
