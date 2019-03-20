@@ -61,7 +61,7 @@ mysqldump --skip-extended-insert --skip-add-locks -ucgds_im_user -ppassword cgds
 #NOTE: the sed command is to resolve the /' that dump escape ' in value, make it ANSI SQL and importable by JDBC
 #mysql -uroot -p${mysql_root_password} -N information_schema -e "select table_name from tables where table_schema = 'cgds_im' and table_name like 'IM_%'" > IM_tables.lst 
 #mysqldump -ucgds_im_user -ppassword cgds_im `cat IM_tables.lst` > cgds_im.sql
-cp cgds_im.sql cbioportal/db-scripts/src/main/resources # this one should go to other scripts, later
+cp cgds_im.sql ../cbioportal/db-scripts/src/main/resources # this one should go to other scripts, later
 #this seed DB is required for any further testing 
 #e.g. debugging CancerTypeMyBatisRepositoryTest with file origifinal from db-scripts
 #cbio.maven.sh test master
