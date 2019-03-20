@@ -1,10 +1,10 @@
 #rename and export biosql tables with one script
-#require perl, mysql, mysqladmin, mysqldump, git 
+#require perl, mysql, mysqladmin, mysqlinit, git 
 #biosql_user of mysql is temporary
 #===========================================
 
 set -x
-if [ -z $1 ]; then biosql_dump_sql="BS_tables.dump.sql"; else biosql_dump_sql=$1; fi;
+if [ -z $1 ]; then biosql_init_sql="BS_tables.init.sql"; else biosql_init_sql=$1; fi;
 biosql_source="https://github.com/chaelir/biosql.git"
 mysql_root_password="password"
 
@@ -36,7 +36,7 @@ mysql -ubiosql_user -ppassword -AN -e"select concat('alter table ', db, '.', tb,
 
 #Export BS_* to an importable file
 #===========================================
-mysqldump -ubiosql_user -ppassword biosql > ${biosql_dump_sql}
+mysqlinit -ubiosql_user -ppassword biosql > ${biosql_init_sql}
 
 #Clean up biosql_user and biosql db
 #===========================================

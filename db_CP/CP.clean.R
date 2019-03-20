@@ -16,13 +16,13 @@ library(dplyr)
 library(tibble)
 
 ### import raw csv data as the output of scrambler cellpedia_init.sh
-cellpedia_anatomy <- read_csv("~/setup/cbioportal-docker/archive/cellpedia.anatomy.csv", 
+cellpedia_anatomy <- read_csv("cellpedia.anatomy.csv", 
   col_types = cols(`Current Anatomy ID` = col_character(), 
   `Sub-organ` = col_character(), `Tissue 5-2` = col_character(), 
   `Tissue 5-3` = col_character(), `Tissue 5-4` = col_character()))
-cellpedia_celltype <- read_csv("~/setup/cbioportal-docker/archive/cellpedia.celltype.csv",
+cellpedia_celltype <- read_csv("cellpedia.celltype.csv",
   col_types = cols(Cell_ID = col_integer()))
-cellpedia_differentiated <- read_csv("~/setup/cbioportal-docker/archive/cellpedia.differentiated.csv", 
+cellpedia_differentiated <- read_csv("cellpedia.differentiated.csv", 
   col_types = cols(`Anatomy Id` = col_character(), 
   `Cell Type Id` = col_integer(), No. = col_integer(), 
   `Sub-organ` = col_character(), Synonym = col_character(), 
@@ -130,10 +130,10 @@ stopifnot(all(CP_cell$ANATOMY_ID %in% CP_anatomy$ANATOMY_ID))
 stopifnot(all(CP_cell$CELL_TYPE_ID %in% CP_celltype$CELL_TYPE_ID))
 
 #write mysql importable tables
-write.table(CP_cell, file='~/setup/cbioportal-docker/cellpedia/CP_cell.csv', 
+write.table(CP_cell, file='CP_cell.csv', 
             quote = F, col.names = T, row.names = F, sep=',')
-write.table(CP_celltype, file='~/setup/cbioportal-docker/cellpedia/CP_celltype.csv', 
+write.table(CP_celltype, file='CP_celltype.csv', 
             quote = F, col.names = T, row.names = F, sep=',')
-write.table(CP_anatomy, file='~/setup/cbioportal-docker/cellpedia/CP_anatomy.csv', 
+write.table(CP_anatomy, file='CP_anatomy.csv', 
             quote = F, col.names = T, row.names = F, sep=',')
 # these CP csv files will be used to populate CP tables and dumped to cellpedia.dump.sql
