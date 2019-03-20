@@ -14,9 +14,9 @@ mysql_root_password="password"
 #[mac] brew install openssl mysql-connector-c
 cpan install DBD::mysql
 git clone ${biosql_source} || true
-cd biosql/scripts #change to scripts
+pushd biosql/scripts #change to scripts
 patch load_ncbi_taxonomy.pl load_ncbi_taxonomy.pl.patch
-cd ..
+popd
 
 #Creat biosql in mysql
 #===========================================
@@ -36,7 +36,6 @@ mysql -ubiosql_user -ppassword -AN -e"select concat('alter table ', db, '.', tb,
 
 #Export BS_* to an importable file
 #===========================================
-cd .. #change to root working dir
 mysqldump -ubiosql_user -ppassword biosql > ${biosql_dump_sql}
 
 #Clean up biosql_user and biosql db

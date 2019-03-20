@@ -71,21 +71,24 @@ write.table(grammy_export, file='~/setup/cbioportal-docker/example/testing/data_
 #   2.1 cell_alias
 
 # 3. modify core/src/main files
+#   3.0 Start with a working cbioportal and always make sure it works after each change
 #   3.1 hack cbioportal/core/src/main/java/org/mskcc/cbio/portal/model/*Cell*.java: 
 #       CanonicalCell.java              Cell.java                    CellAlterationType.java        CellProfile.java
 #   3.2 hack cbioportal/core/src/main/java/org/mskcc/cbio/portal/scripts/*Cell*.java: 
 #       ImportCellProfileData.java      ExportCellProfileData.java 
 
 # 4. modify core/src/test files
+#   4.0 Start with a working cbioportal and always make sure it works after each change
 #   4.1 check cbioportal/core/src/test/java/org/mskcc/cbio/portal/model/*Cell*.java: 
 #       No files were affected.
 #   4.2 check cbioportal/core/src/test/java/org/mskcc/cbio/portal/scripts/*Cell*.java: 
 #       ImportCellProfileData.java 
 
 # 5. test portal using cbio.hack.sh test core
+#   5.0 Start with a working cbioportal and always make sure it works after each change
 #   5.1 Fix DaoTextCache error [DONE: 3ef640007]
-#   5.2 Add seed database cgds_im.sql to cbioportal/db-scripts/src/main/resources
-#       5.2.1 prepare a table.lst
+#   5.2 Add cgds_im.init.sh to generate the seed IM database cgds_im.sql by dumping IM_tables 
+#   5.3 Add the cgds_im.sql to cbioportal/db-scripts/src/main/resources and Make sure maven test master works
 
 # 5. try scripts/metaImport.py
 #   5.1 run it and check database change
