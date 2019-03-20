@@ -1,0 +1,6 @@
+integrate antigen data
+=========================
+
+sample, chr, pos, change, MHC HLA binds, Gene Name
+
+NetMHCpan 4.0 predicts HLA based on epitope

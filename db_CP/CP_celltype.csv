@@ -1,0 +1,730 @@
+CELL_TYPE_ID,CELL_TYPE_NAME
+0,Unspecified cell type
+1,B cell
+2,Basophil
+3,Eosinophil
+4,Leukocyte
+5,Lymphocyte
+6,Macrophage
+7,M1 macrophage
+8,M2 macrophage
+9,Activated myeloid dendritic cell
+10,Mast cell
+11,Monocyte
+12,Neutrophil
+13,Plasma cell
+14,Red blood cell (erythrocyte)
+15,T cell
+16,T helper cell
+17,A cell
+18,Astrocyte
+19,Acinar cell
+20,Alpha cell
+21,Alverolar macrophage
+22,Amacrine cell
+23,Ameloblast
+24,Antigen-presenting cell
+25,Arachnoid trabecular cell
+26,Beta cell
+27,Memory B cell
+28,Basal cell
+29,Segmented neutrophil
+30,Megakaryocyte
+31,Platelet (thrombocyte)
+32,Myeloid dendritic cell
+33,Bergmann glial cell
+34,Basket cell
+35,Bipolar cell
+36,Bipolar neuron
+37,Border cell
+38,Bottcher cell
+39,Brush cell (Tuft cell)
+40,Plasmacytoid dendritic cell
+41,Cajal-Retzius cell
+42,Capsule cell
+43,Cardiomyocyte
+44,CCK cell
+45,Cementoblast
+46,Cementocyte
+47,Centroacinar cell
+48,Centrocyte
+49,Chief cell
+50,Granulocyte
+51,Chondrocyte
+52,Chondrogenic cell
+53,Chromaffin cell
+54,Ciliated cell
+55,Cholangiocyte (biliary epithelial cell)
+56,Thymocyte
+57,Subcortical thymocyte
+58,Ciliated columnar cell
+59,Clara cell
+60,Claudius cell
+61,Clear cell
+62,Cortical thymocyte
+63,Cone cell
+64,Corticotroph
+65,D cell
+66,Medullary thymocyte
+67,delta cell of pancreatic islet
+68,Dark cell
+69,Thymic macrophage
+70,Dermal dendritic cell
+71,Diffuse neuroendocrine system cell
+72,Mural cell
+73,Dome-shaped cell
+74,EC cell
+75,Interstitial fibroblast
+76,ECL cell
+77,Elastic fiber cell
+78,Endothelial cell
+79,EC1 enteroendocrine cell
+80,EC2 enteroendocrine cell
+81,Enterocyte
+82,Crypt base columnar（CBC）cell
+83,Microglial cell
+84,Fan cell
+85,Ependymoglial cell
+86,Enteroendocrine cell
+87,Cumulus cell
+88,Ependymal cell
+89,Epithelial cell
+90,Duct epithelial cell
+91,Columnar/cuboidal epithelial cell
+92,Grid cell
+93,Multiform neuron
+94,Horizontal tripolar cell
+95,Foveolar cell (surface mucous cell)
+96,CNS long range interneuron
+97,CNS short range interneuron
+98,Mitral cell
+99,Periglomerular cell
+100,Meynert cell
+101,Mesangial cell
+102,Type B cell
+103,Type A cell
+104,Ureter cell
+105,Dopamanergic interplexiform cell
+106,GABAnergic interplexiform cell
+107,Retina bipolar neuron
+108,White fat cell (white adipocyte)
+109,Macrophage (Lyve-1+cell)
+110,Brown fat cell (brown adipocyte)
+111,Corneal epithelial cell
+112,Lens epithelial cell
+113,Basal external epithelial cell
+114,Epithelial reticular cell
+115,Beige fat cell (beige adipocyte
+117,Extraglomerular mesangial cell
+118,Fasciculata cell
+119,Fat cell (adipocyte)
+120,Fibroblast
+121,Follicle epithelial cell
+122,Follicular dendritic cell
+123,Type G enteroendocrine cell
+124,Luminal epithelial cell
+125,Primary lens fiber cell
+126,GL cell
+127,Glandular cell
+128,Meibocyte
+129,Intrahepatic bile duct epithelial cell
+130,Stromal cell
+131,Hilar mossy cell
+132,Oligodendrocyte
+133,Glutamatergic neuron
+134,Glial cell
+135,Glomerulosa cell
+136,Goblet cell
+137,Golgi cell
+138,Gonadotroph
+139,Granular cell
+140,Granule cell
+141,Granulosa cell
+142,Granulosa-lutein cell
+143,Hensen's cell
+144,Hepatocyte
+145,Hilus cell
+146,Horizontal cell
+147,Immature NK cell (iNK cell)
+148,Hyalocyte
+149,I cell
+150,Inner hair cell
+151,Inner phalangeal cell
+152,Inner pillar cell
+153,Intercalated cell
+154,Interdental cell
+155,Interdigitating dendritic cell
+156,Intermediate cell
+157,Interneuron
+158,Interstitial cell
+159,Medium spiny neuron
+160,Magnocellular neurosecretory cell
+161,Interstitial cell of Leydig
+162,Intraglomerular mesangial cell
+163,Ito cell (hepatic stellate cell)
+164,K cell
+165,Keratinocyte
+166,Kolmer-Agduhr neuron
+167,Lugaro cell
+168,Kupffer cell
+169,Langerhans cell
+170,Light cell
+171,Mammotroph
+172,Marginal cell
+173,Marginal zone B cell
+174,Martinotti cell
+175,Melanocyte
+176,Merkel cell
+177,Mesenchymal cell
+178,Microfold cell
+179,MO cell
+180,Mucous cell
+181,Mucus neck cell
+182,Muller cell
+183,Muscle cell
+184,Myoepithelial cell
+185,Neuronal brush cell
+186,Myofibroblast
+187,N cell
+188,Peripheral neuron
+189,Neuron
+190,Nonciliated cuboidal cell
+191,Nonciliated secretory cell
+192,Nonpigment epithelial cell
+193,Neurosecretory cell
+194,Odontoblast
+195,Odontoclast
+196,Olfactory cell
+197,Optic nerve cell
+198,Outer hair cell
+199,Outer phalangeal cell
+200,Outer pillar cell
+201,Oxyphil cell
+202,Paneth cell
+203,Parafollicular cell
+204,Parietal cell
+205,Pericyte
+206,Pigment cell
+207,Pigment epithelial cell
+208,Pinealocyte
+209,Pit cell
+210,Pituicyte
+211,Podocyte
+212,PP cell
+213,Radial glial cell
+214,Prickle cell
+215,Principal cell
+216,Pyramidal neuron
+217,Purkinje cell
+218,Pyramidal cell
+219,Reticular cell
+220,Reticularis cell
+221,Rod cell
+222,Retinal ganglion cell
+223,S cell
+225,Ratellite cell
+226,Schwann cell
+227,Secretory cell
+228,Serous cell
+229,Sertoli cell
+230,Skeletal muscle cell
+231,Smooth muscle cell
+232,Veiled cell
+233,Tanycyte
+234,Perineuronal satellite cell
+235,Somatotroph
+236,Sperm
+237,Squamous cell
+238,Stellate cell
+239,Striatum neuron
+240,Stellate reticular cell
+241,Striated muscle cell
+242,Tufted cell
+243,Supporting cell
+244,Surface-lining cell
+245,Sustentacular cell
+246,Theca cell
+247,Theca-lutein cell
+248,Thyrotroph
+249,Tingible body macrophage
+250,Transitional epithelial cell
+251,Type I hair cell
+252,Type I pneumocyte (alveolar type I cell)
+253,Type II hair cell
+254,Type II pneumocyte (alveolar type II cell)
+255,VIP cell
+256,Transit amplifying （TA） cell
+257,Pericryptal stromal cell
+258,Vascular endothelial cell
+259,Ciliary muscle cell
+260,Stellate neuron
+261,Natural killer cell
+262,gamma cell
+263,T helper1 (Th1) cell
+264,T helper2 (Th2) cell
+265,T helper3 (Th3) cell
+266,T helper9 (Th9) cell
+267,T helper17 (Th17) cell
+268,T helper22 (Th22) cell
+269,Follicular helper (Tfh) T cell
+270,Memory T cell
+271,Central CD4+ memory T (Tcm) cell
+272,Central CD8+ memory T (Tcm) cell
+273,Effector CD4+ memory T (Tem) cell
+274,Effector CD8+ memory T (Tem) cell
+275,Resident memory T (Trm) cell
+276,Regulatory T (Treg) cell
+277,CD8+ cytotoxic T lymphocyte
+278,Gamma delta T cell
+279,Natural killer T (NKT) cell
+280,Naive T cell (Th0 cell)
+281,Naïve CD4+ T cell
+282,Naïve CD8+ T cell
+283,Activated CD4+ T cell
+284,Activated CD8+ T cell
+285,Side-population cell
+286,Activated B cell
+287,Naive B cell
+288,CD16+ monocyte
+289,Centroblast
+290,Basal epithelial cell
+291,Epsilon cell (ghrelin cell)
+292,Dental papilla cell
+293,Dental follicle cell
+294,Dental placode cell
+295,Enamel epithelial cell
+296,Enamel knot cell
+297,Mesothelial cell
+298,Submesothelial cell
+299,Definitive erythrocyte
+300,Primitive erythrocyte
+301,Lung epithelial cell
+302,Non-neuroendocrine cell
+303,Neuroendocrine cell
+304,Corneocyte
+305,Intermediate keratinocyte
+306,Outer root sheath cell (epithelial cell)
+307,Periderm cell
+308,Osteoblast
+309,Osteocyte
+310,Conventional dendritic cell I
+311,Conventional dendritic cell II
+312,DN1 thymocyte
+313,DN2 thymocyte
+314,DN3 thymocyte
+315,DN4 thymocyte
+316,DP thymocyte
+317,Primitive megakaryocyte
+318,Myeloid cell
+319,Small luteal cell
+320,Glenoid fossa cell
+321,Spermatozoon (motile sperm cell)
+322,Myoid cell
+323,Mullerian duct cell
+324,Perivascular cell
+325,Testis somatic cell
+326,Suture cell
+327,Disc cell
+328,Polymorphic cell
+329,Central intermediate lamina cell
+330,Nucleus pulposus cell
+331,Annulus fibrosus cell
+332,Valve cell
+333,Endocardial tube cell
+334,Epicardial cell
+335,Subepicardial cell
+336,Purkinje myocyte
+337,Septum cell
+338,His bundle cell
+339,Bundle branch cell
+340,Sinoatrial node cell
+341,atrioventricular node cell
+342,Ptrioventricular canal cell
+343,Skeletal muscle satellite cell
+344,Mononuclear myocyte
+345,Multinuclear myocyte
+346,Dopaminergic neuron
+347,Meningeal cell
+348,Choroid plexus cell
+349,Motor neuron
+350,Muscle motor neuron
+351,Association neuron
+352,Protoplasmic astrocyte
+353,VA1 astrocyte
+354,VA2 astrocyte
+355,VA3 astrocyte
+356,Pre-myelinating oligodendrocyte cell
+357,Myelinating oligodendrocyte cell
+358,Superbasal epithelial cell
+359,Superficial epithelial cell
+360,nGnG amacrine cell
+361,SEG amacrine cell
+362,AII amacrine cell
+363,Glycinergic amacrine cell
+364,Dopaminergic amacrine cell
+365,Cholinergic amacrine cell
+366,GABAergic amacrine cell
+367,Keratocyte
+368,Type9 on cone bipolar cell
+369,Type8 on cone bipolar cell
+370,Type7 on cone bipolar cell
+371,Type6 on cone bipolar cell
+372,Type5 on cone bipolar cell
+373,Type4 off cone bipolar cell
+374,Type3b off cone bipolar cell
+375,Type3a off cone bipolar cell
+376,Type2 off cone bipolar cell
+377,Type1 off cone bipolar cell
+378,S cone cell
+379,M-S cone cell
+380,M cone cell
+381,L cone cell
+382,Rod bipolar cell
+383,Lens fiber cell
+384,Transitional lens fiber cell
+385,Young lens fiber cell
+386,Secondary lens fiber cell
+387,Conjunctival epithelial cell
+388,Ciliary marginal zone cell
+389,Early immature amacrine cell
+390,Late immature amacrine cell
+391,Displaced amacrine cell
+392,Mural granulosa Cell
+393,Bistratified cell
+394,GABAergic interneuron
+395,Cranial visceral motor neuron
+396,Visceral motor neuron
+397,Somatic motor neuron
+398,Non-myelinating Schwann cell
+399,Cup cell
+400,X/A-like endocrine cell
+401,P/D1 cell
+402,Alveolar cell
+403,Hypertrophic chondrocyte
+404,Prehypertrophic chondrocyte
+405,Fibrocyte
+406,Dendriform cell
+407,Endothelial stalk cell
+408,Endothelial tip cell
+409,Stratified amacrine cell
+410,Interstitial fibrocyte
+411,Mesenchymal stroma cell
+412,Promyelinating Schwann cell
+413,Hair matrix cell
+414,pro-Natural killer cell (pro-NK cell)
+415,pre-Natural killer cell (pre-NK cell)
+416,B Lymphocyte Progenitor
+417,Follicular B cell
+418,Plasmablast
+419,Polychromatophilic erythroblast
+420,DNES cell
+421,Collagen fibril cell
+431,Dural border cell
+432,Arachnoid barrier cell
+433,Cortical cell
+434,Hofbauer cell
+435,Choroid plexus progenitor
+695,Chorionic mesoderm cell
+696,Endoderm progenitor cell
+697,Mature articular cartilage mesenchymal progenitor cell
+698,Chondrogenic cartilage progenitor cell
+699,Mesenchymal progenitor
+700,Basophilic band cell
+701,Basophilic erythroblast
+702,Basophilic metamyelocyte
+703,Basophilic myeloblast
+704,Basophilic myelocyte
+705,Basophilic promyelocyte
+706,Cardiac stem cell
+707,Cardiomyocyte progenitor cell
+708,CFU-Bas
+709,CFU-EM (megakaryocyte-erythroid progenitor|Megakaryocyte-erythroid progenitor (MEP)
+710,CFU-Eo
+711,CFU-GM (granulocyte-monocyte progenitor|Granulocyte-monocyte progenitor (GMP)
+712,CFU-Meg
+713,Chondroblast
+714,Dental pulp stem cell
+715,Embryonic stem cell
+716,Eosinophilic band cell
+717,Eosinophilic metamyelocyte
+718,Eosinophilic myeloblast
+719,Eosinophilic myelocyte
+720,Eosinophilic promyelocyte
+721,Gastric progenitor cell
+722,Gastric stem cell
+723,Glia progenitor cell
+724,Hematopoietic stem cell
+725,Hepatoblast
+726,Interfollicular epidermis stem cell
+727,Large intestinal progenitor cell
+728,Large intestinal stem cell
+729,Liver progenitor cell
+730,Lymphoid stem cell (CLP)|Common lymphoid progenitor (CLP)
+731,Mammary gland stem cell
+732,Megakaryoblast
+733,Melanocyte stem cell
+734,Mesenchymal stem cell
+735,Multipotent hair follicle stem cell
+736,Muscle satellite cell
+737,Myeloid stem cell (CFU-GEMM|Common myeloid progenitor (CMP)
+738,Myoblast
+739,Neural progenitor cell
+740,Neural stem cell
+741,Neutrophilic band cell
+742,Neutrophilic metamyelocyte
+743,Neutrophilic myeloblast
+744,Neutrophilic myelocyte
+745,Neutrophilic promyelocyte
+746,Nose stem cell
+747,Oogonium
+748,Orthochromatic erythroblast
+749,Osteoprogenitor cell
+750,Osteoclast
+751,Oval cell
+752,Pancreatic progenitor cell
+753,Pancreatic stem cell
+754,Periodontal stem cell
+755,Primary oocyte
+756,Primary spermatocyte
+757,Proerythroblast
+758,Promonocyte
+759,Respiratory stem cell
+760,Reticulocyte
+761,Secondary oocyte
+762,Secondary spermatocyte
+763,Small intestinal progenitor cell
+764,Small intestinal stem cell
+765,Spermatogonium
+766,Primordial germ cell
+767,Hemangioblast
+768,Hematopoietic precursor cell
+769,Zygote
+770,2-cell stage cell (Blastomere)
+771,4-cell stage cell (Blastomere)
+772,8-cell stage cell (Blastomere)
+773,Blastomere
+774,Syncytiotrophoblast
+775,Langhans cell
+776,Amnion epithelial cell
+777,Spermatogonial stem cell (male germ line stem cell)
+778,Amnion cell
+779,Mesoblast
+780,Trophectoderm cell
+781,Erythroid precursor (BFU-E)
+782,Monoblast (CFU-M)
+783,Myeloblast (CFU-G)
+784,Pro-B cell
+785,Pre-B cell
+786,Immature B cell (Early B cell)
+787,Intermediate B cell (transitional stage B cell)
+788,Fraction B/C precursor B cell
+789,Fraction D precursor B cell
+790,Schwann cell precursor
+791,Immature Schwan cell
+792,LRC +4 stem cell
+793,Neural crest cell
+794,LRC +5 stem cell
+795,Trophoblast cell
+796,Epiblast cell
+797,Primitive endoderm cell
+798,Neural epithelial cell
+799,Erythroblast
+800,Promyelocyte
+801,Myeloid progenitor cell
+802,Germline stem cell
+803,Adipose-derived stem cell
+804,Prepancreatic foregut endoderm cell
+805,Acinar progenitor cell
+806,Bipotent endocrine/ Duct progenitor cell
+807,Endocrine progenitor cell
+808,Duct progenitor cell
+809,Pancreatic polypeptide progenitor cell
+810,Alpha progenitor cell
+811,Beta/ delta progenitor cell
+812,Early beta progenitor cell
+813,Intermediate beta progenitor cell
+814,Immature beta progenitor cell
+815,Preadipocyte
+816,Brown preadipocyte
+817,White preadipocyte
+818,Dental epithelial stem cell
+819,Preameloblast
+820,Pre-stellate cell
+821,Hepatic mesoderm cell
+822,Spermatogonium type A
+823,Primitive macrophage
+824,Hepatic endoderm cell
+825,Hepatic diverticulum cell
+826,Immature biliary epithelial cell
+827,Endoderm cell
+828,Lung progenitor cell
+829,Trachea progenitor cell
+830,Lung bud progenitor cell
+831,Alveolar progenitor cell
+832,Bronchial multipotent progenitor cell
+833,Bronchiolar progenitor cell
+834,Multipotent mesoderm progenitor
+835,Mesodermal progenitor cell
+836,Prechondrocyte
+837,Smooth muscle progenitor cell
+838,Angioblast
+839,Dermomyotome cell
+840,Preadipocyte progenitor cell
+841,Outer root sheath progenitor cell
+842,Surface ectoderm cell
+843,Oral ectoderm cell
+844,Maxillary ectoderm cell
+845,CFU-E
+846,Preosteoblast
+847,Osteochondro progenitor cell
+848,Mononucleated osteoclast
+849,Multinucleated osteoclast
+850,Paraxial mesoderm cell
+851,Osteoclast precursor cell
+852,Common dendritic cell precursor
+853,Macrophage-dendritic cell progenitor
+854,Pre conventional dendritic cell
+855,Mast cell progenitor
+856,Pre-pro B cell
+857,Large pre B-cell
+858,Small pre B-cell
+859,Primitive hematopoietic stem cell
+860,Definitive hematopoietic stem cell
+861,Definitive myeloid progenitor cell
+862,Visceral endoderm cell
+863,Pre-leydig cell
+864,Pre-sertoli cell
+865,Pre-granulosa cell
+866,XX germ cell
+867,XY germ cell
+868,Ovum
+869,Spermatogonium type B
+870,Spermatid
+871,Elongated spermatid
+872,Mesonephric cell
+873,Developing myoid cell
+874,Gonad-mesonephros border cell
+875,Gonad somatic cell
+876,Sclerotome cell
+877,Notochordal cell
+878,Interzone cell
+879,Disc progenitor
+880,Polymorphic progenitors cell
+881,Condylar condensation cell
+882,Progress zone cell
+883,Proepicardial progenitor cell
+884,Epicardial progenitor cell
+885,Pre-endocardial cel
+886,Endocardial cell
+887,Endocardial cushion cell
+888,Pre-myocardial cell
+889,Migratory cardiac neural crest cell
+890,Outflow tract cushion cell
+891,Cardiac progenitor cell
+892,Cardiac crescent cell
+893,Ventricular conductive cell
+894,Heart tube cell
+895,Primitive heart tube cell
+896,Inflow progenitor
+897,Juxtaglomerular precursor
+898,S-shaped body cell
+899,Pretubular aggregate cell
+900,Rrenal vesicle cell
+901,Comma-shaped body cell
+902,Collecting duct cell
+903,Wolffian duct cell
+904,Ureteric bud cell
+905,Ureteric bud tip cell
+906,Intermediate mesoderm cell
+907,Muscle progenitor cell
+908,Prechordal mesoderm cell
+909,Oligodendrocyte precursor cell
+910,Astrocyte precursor cell
+911,Bergmann glia precursor cell
+912,Dopaminergic precursor cell
+913,Dopaminergic progenitor cell
+914,Meningeal progenitor cell
+915,Ganglionic eminence progenitor cell
+916,Telencephalic progenitor cell
+917,Anterior entopeduncular progenitor cell
+918,Neural fold cell
+919,Neural ectoderm cell
+920,Basal plate cell
+921,Floor plate cell
+922,Roof plate cell
+923,Alar plate cell
+924,Neural plate cell
+925,Rhombic lip progenitor cell
+926,Hinge point cell
+927,Motor neuron progenitor cell
+928,Spinal cord progenitor cell
+929,d6 neural progenitor cell
+930,d5 neural progenitor cell
+931,d4 neural progenitor cell
+932,d3 neural progenitor cell
+933,V3 neural progenitor cell
+934,V2 neural progenitor cell
+935,V1 neural progenitor cell
+936,Ocular surface ectoderm cell
+937,Amacrine horizontal precursor cell
+938,Amacrine precursor cell
+939,Keratoblast
+940,Muller glia precursor cell
+941,Cone bipolar precursor cell
+942,Cone precursor cell
+943,Horizontal precursor cell
+944,Rod precursor cell
+945,Rod bipolar precursor cell
+946,Ganglion precursor cell
+947,Periocular mesenchymal cell
+948,Retinal progenitor cell
+949,Pigmented epithelium progenitor cell
+950,Lens placode cell
+951,Lens vesicle cell
+952,Preplacodal lens ectoderm cell
+953,Bipolar precursor cell
+954,Late photoreceptor precursor cell
+955,Early photoreceptor precursor cell
+956,Absorbative progenitor cell
+957,Enteroendocrine precursor cell
+958,Secretory progenitor cell
+959,G/D progenitor cell
+960,Myoepithelial progenitor cell
+961,Common progenitor cell
+962,Luminal progenitor cell
+963,Early pro-B cell
+964,Late pro-B cell
+965,Immature pre-B cell
+966,T1 (Transitional) B cell
+967,T2 (Transitional) B cell
+968,T cell precursor
+969,Amniotic fluid stem cell
+970,Bone marrow-derived mesenchymal stem cell
+971,Myelolymphoid progenitor cell
+972,Multipotent progenitor (MPP)
+973,Lymphoid-primed multipotent progenitors (LMPP)
+974,Multilymphoid progenitor (MLP)
+975,Pre-common dendritic cell precursor (CDP)
+976,Neuroblast
+977,Neuroglioblast
+978,Nephron progenitor
+979,Parietal endoderm cell
+980,Extraembryonic endoderm cell
+981,Yolk sac endoderm cell
+982,Allantois cell
+983,Primary yolk sac endoderm cell
+985,Cytotrophoblast
+986,Placental bed giant cell
+987,Extraembryonic ectoderm cell
+988,Neuroepithelial cell
+989,Neuroepithelial stem cell
+990,Early amacrine precursor cell
+991,Late amacrine precursor cell
+992,Primitive gut endoderm cell
+993,Endothelial progenitor cell
+994,Bulge stem cell
+995,Dermal progenitor cell
+996,Preodontoblast
+997,Trophoblast stem cell
+998,Chorionic ectoderm cell
+999,Amniotic ectoderm cell

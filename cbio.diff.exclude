@@ -1,0 +1,9 @@
+*.git
+*.m2
+*.iml
+*.todo
+*.original
+*.DS_Store
+*.idea
+__pycache__
+target
