@@ -55,13 +55,19 @@ mysql -ucgds_im_user -ppassword cgds_im < ${im_cell_init_sql}
 
 ### 3. Export only the IM database into a sql file
 #===========================================
-mysqldump --skip-extended-insert --skip-add-locks -ucgds_im_user -ppassword cgds_im IM_cell_entity IM_cell IM_cell_profile IM_cell_alteration IM_cell_alias | sed -e "s/\\\'/''/g" > cgds_im.sql
+echo "/* LICENSE_TBD */" >cgds_im.sql
+echo "SET NAMES utf8mb4;" >>cgds_im.sql
+echo "SET FOREIGN_KEY_CHECKS = 0;" >>cgds_im.sql
+mysqldump --skip-extended-insert --skip-add-locks -ucgds_im_user -ppassword cgds_im IM_cell_entity IM_cell IM_cell_profile IM_cell_alteration IM_cell_alias | sed -e "s/\\\'/''/g" >> cgds_im.sql
+echo "SET FOREIGN_KEY_CHECKS = 1;" >>cgds_im.sql
+cp cgds_im.sql ../cbioportal/db-scripts/src/main/resources 
+# this one should go to other scripts, later
+
 #NOTE: b/c of dependency table dumping order is important. A simply dump like the following does not work!
 #NOTE: add --skip-add-locks to avoid LOCK/UNLOCK statements in the dumped sql
 #NOTE: the sed command is to resolve the /' that dump escape ' in value, make it ANSI SQL and importable by JDBC
 #mysql -uroot -p${mysql_root_password} -N information_schema -e "select table_name from tables where table_schema = 'cgds_im' and table_name like 'IM_%'" > IM_tables.lst 
 #mysqldump -ucgds_im_user -ppassword cgds_im `cat IM_tables.lst` > cgds_im.sql
-cp cgds_im.sql ../cbioportal/db-scripts/src/main/resources # this one should go to other scripts, later
 #this seed DB is required for any further testing 
 #e.g. debugging CancerTypeMyBatisRepositoryTest with file origifinal from db-scripts
 #cbio.maven.sh test master

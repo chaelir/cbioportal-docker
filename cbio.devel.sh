@@ -9,10 +9,13 @@
 # cbio.maven.sh prep_dep security
 # cbio.maven.sh prep_dep security
 # cbio.maven.sh test master
+# cbio.maven.sh integration-test master
+# cbio.devel.sh compile master
+# seems building child pom directly cause resources not properlly set
 # cbio.maven.sh test persistence-mybatis
 # cbio.maven.sh test core -Dtest=TestDaoTextCache
 
-# never run, for copy and paste only
+# never run, for copy and paste purpose only
 # install individual dependency if overall test breaks for the target org.mskcc.cbio:core
 # to continue debug light-weightly, do individual test:
 if [[ "1" == "2" ]]; then
@@ -71,30 +74,32 @@ else
   pushd cbioportal
   mkdir -p .m2
   cp .travis/settings.xml .m2
-  PROFILE="charlie"
+  PROFILE=""
   GOAL=$1
+  OPT=$3
 
   if [[ $2 == "master" ]]; then 
     MODULE=""
+    PROFILE="-Pcharlie"
+  elif [[ -z $(echo $MODULE | grep '-') ]]; then
+    pushd $2 #things like core 
+  elif [[ $2 == "db-scripts" ]]; then 
+    pushd $2 #things like db-scripts
   else 
-    if [[ $2 == "db-scripts" ]]; then 
-      pushd $2;
-      #MODULE=":$2"
-    else
-      SUBDIR=$(echo $2 | cut -d '-' -f 1)
-      pushd $SUBDIR/$2; 
-    fi
-    OPT=$3
+    SUBDIR=$(echo $2 | cut -d '-' -f 1)
+    pushd $SUBDIR/$2
   fi
-  mvn -e \
-      -P${PROFILE} \
+
+  ls pom.xml
+  mvn -e ${PROFILE} -f pom.xml \
       -Dfinal.war.name=cbioportal \
       -Ddb.user=cbio_user \
       -Ddb.password=somepassword \
       ${OPT} \
       ${GOAL}
+
   if [[ $2 != "master" ]]; then 
-      popd; 
+      popd
       continue
   fi
    

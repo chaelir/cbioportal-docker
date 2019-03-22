@@ -32,7 +32,7 @@ DROP TABLE IF EXISTS `IM_cell_alias`;
 -- ----------------------------
 DROP TABLE IF EXISTS `IM_cell_entity`;
 CREATE TABLE `IM_cell_entity` (
-  `ID` int(11) NOT NULL,
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
   `ENTITY_TYPE` varchar(45) NOT NULL DEFAULT '',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -42,7 +42,7 @@ CREATE TABLE `IM_cell_entity` (
 -- ----------------------------
 DROP TABLE IF EXISTS `IM_cell`;
 CREATE TABLE `IM_cell` (
-  `CELL_ENTITY_ID` int(11) NOT NULL AUTO_INCREMENT,
+  `CELL_ENTITY_ID` int(11) NOT NULL,
   `UNIQUE_CELL_ID` int(11) NOT NULL,
   `UNIQUE_CELL_NAME` varchar(255) NOT NULL,
   `TYPE` varchar(50) DEFAULT NULL,
