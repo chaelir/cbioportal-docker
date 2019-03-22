@@ -8,6 +8,7 @@
 
 #show script commands
 set -x
+im_base=$(cd .. && pwd)
 
 ### 0. configurable variables and dependency installation
 biosql_init_sql="../db_BS/BS_tables.init.sql"
@@ -31,19 +32,19 @@ mysql -ucgds_im_user -ppassword cgds_im < ${biosql_init_sql}
 mysql -ucgds_im_user -ppassword cgds_im < ${cellpedia_init_sql}
 #NOTE: the LOCAL keyword is important to avoid access denied issue for loading.
 mysql -ucgds_im_user -ppassword cgds_im -ve "
-    LOAD DATA LOCAL INFILE '../db_CP/CP_anatomy.csv'
+    LOAD DATA LOCAL INFILE '${im_base}/db_CP/CP_anatomy.csv'
     INTO TABLE CP_anatomy
     FIELDS TERMINATED BY ','
     LINES TERMINATED BY '\n'
     IGNORE 1 ROWS;"
 mysql -ucgds_im_user -ppassword cgds_im -ve "
-    LOAD DATA LOCAL INFILE '../db_CP/CP_celltype.csv'
+    LOAD DATA LOCAL INFILE '${im_base}/db_CP/CP_celltype.csv'
     INTO TABLE CP_celltype
     FIELDS TERMINATED BY ','
     LINES TERMINATED BY '\n'
     IGNORE 1 ROWS;"
 mysql -ucgds_im_user -ppassword cgds_im -ve "
-    LOAD DATA LOCAL INFILE '../db_CP/CP_cell.csv'
+    LOAD DATA LOCAL INFILE '${im_base}/db_CP/CP_cell.csv'
     INTO TABLE CP_cell
     FIELDS TERMINATED BY ','
     LINES TERMINATED BY '\n'
@@ -58,10 +59,12 @@ mysql -ucgds_im_user -ppassword cgds_im < ${im_cell_init_sql}
 echo "/* LICENSE_TBD */" >cgds_im.sql
 echo "SET NAMES utf8mb4;" >>cgds_im.sql
 echo "SET FOREIGN_KEY_CHECKS = 0;" >>cgds_im.sql
-mysqldump --skip-extended-insert --skip-add-locks -ucgds_im_user -ppassword cgds_im IM_cell_entity IM_cell IM_cell_profile IM_cell_alteration IM_cell_alias | sed -e "s/\\\'/''/g" >> cgds_im.sql
+mysqldump --skip-extended-insert --skip-add-locks -ucgds_im_user -ppassword cgds_im IM_cell_entity IM_cell IM_cell_profile IM_cell_alteration IM_cell_alias IM_cell_profile_samples IM_cell_profile_link | sed -e "s/\\\'/''/g" >> cgds_im.sql
 echo "SET FOREIGN_KEY_CHECKS = 1;" >>cgds_im.sql
 cp cgds_im.sql ../cbioportal/db-scripts/src/main/resources 
-# this one should go to other scripts, later
+# for an updated cgds_im.sql script to be effective, need:
+# 1. cbio.devel.sh install db-scripts
+# 2. cbio.devel.sh integration-test core
 
 #NOTE: b/c of dependency table dumping order is important. A simply dump like the following does not work!
 #NOTE: add --skip-add-locks to avoid LOCK/UNLOCK statements in the dumped sql

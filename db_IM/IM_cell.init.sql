@@ -100,6 +100,31 @@ CREATE TABLE `IM_cell_alias` (
   CONSTRAINT `im_cell_alias_x_cell` FOREIGN KEY (`UNIQUE_CELL_ID`) REFERENCES `IM_cell` (`UNIQUE_CELL_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- ----------------------------
+--  Table structure for `IM_cell_profile_samples`
+-- ----------------------------
+DROP TABLE IF EXISTS `IM_cell_profile_samples`;
+CREATE TABLE `IM_cell_profile_samples` (
+  `CELL_PROFILE_ID` int(11) NOT NULL,
+  `ORDERED_SAMPLE_LIST` longtext NOT NULL,
+  UNIQUE KEY `CELL_PROFILE_ID` (`CELL_PROFILE_ID`),
+  CONSTRAINT `im_cell_profile_samples_x_cell_profile` FOREIGN KEY (`CELL_PROFILE_ID`) REFERENCES `IM_cell_profile` (`CELL_PROFILE_ID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+--  Table structure for `IM_genetic_profile_link`
+-- ----------------------------
+DROP TABLE IF EXISTS `IM_genetic_profile_link`;
+CREATE TABLE `IM_genetic_profile_link` (
+  `REFERRING_CELL_PROFILE_ID` int(11) NOT NULL,
+  `REFERRED_CELL_PROFILE_ID` int(11) NOT NULL,
+  `REFERENCE_TYPE` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`REFERRING_CELL_PROFILE_ID`,`REFERRED_CELL_PROFILE_ID`),
+  KEY `REFERRED_CELL_PROFILE_ID` (`REFERRED_CELL_PROFILE_ID`),
+  CONSTRAINT `im_cell_profile_link_x_cell_profile` FOREIGN KEY (`REFERRING_CELL_PROFILE_ID`) REFERENCES `IM_cell_profile` (`CELL_PROFILE_ID`) ON DELETE CASCADE,
+  CONSTRAINT `im_cell_profile_link_x_cell_profile` FOREIGN KEY (`REFERRED_CELL_PROFILE_ID`) REFERENCES `IM_cell_profile` (`CELL_PROFILE_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 /* populate cell entries from CP */
 
 -- cell
