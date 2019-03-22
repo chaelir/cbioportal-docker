@@ -21,12 +21,6 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
-DROP TABLE IF EXISTS `IM_cell_entity`;
-DROP TABLE IF EXISTS `IM_cell`;
-DROP TABLE IF EXISTS `IM_cell_profile`;
-DROP TABLE IF EXISTS `IM_cell_alteration`;
-DROP TABLE IF EXISTS `IM_cell_alias`;
-
 -- ----------------------------
 --  Table structure for `IM_cell_entity`
 -- ----------------------------
@@ -112,26 +106,40 @@ CREATE TABLE `IM_cell_profile_samples` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
---  Table structure for `IM_genetic_profile_link`
+--  Table structure for `IM_cell_profile_link`
 -- ----------------------------
-DROP TABLE IF EXISTS `IM_genetic_profile_link`;
-CREATE TABLE `IM_genetic_profile_link` (
+DROP TABLE IF EXISTS `IM_cell_profile_link`;
+CREATE TABLE `IM_cell_profile_link` (
   `REFERRING_CELL_PROFILE_ID` int(11) NOT NULL,
   `REFERRED_CELL_PROFILE_ID` int(11) NOT NULL,
   `REFERENCE_TYPE` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`REFERRING_CELL_PROFILE_ID`,`REFERRED_CELL_PROFILE_ID`),
   KEY `REFERRED_CELL_PROFILE_ID` (`REFERRED_CELL_PROFILE_ID`),
-  CONSTRAINT `im_cell_profile_link_x_cell_profile` FOREIGN KEY (`REFERRING_CELL_PROFILE_ID`) REFERENCES `IM_cell_profile` (`CELL_PROFILE_ID`) ON DELETE CASCADE,
-  CONSTRAINT `im_cell_profile_link_x_cell_profile` FOREIGN KEY (`REFERRED_CELL_PROFILE_ID`) REFERENCES `IM_cell_profile` (`CELL_PROFILE_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `im_cell_profile_link_x_cell_profile_1` FOREIGN KEY (`REFERRING_CELL_PROFILE_ID`) REFERENCES `IM_cell_profile` (`CELL_PROFILE_ID`) ON DELETE CASCADE,
+  CONSTRAINT `im_cell_profile_link_x_cell_profile_2` FOREIGN KEY (`REFERRED_CELL_PROFILE_ID`) REFERENCES `IM_cell_profile` (`CELL_PROFILE_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /* populate cell entries from CP */
 
--- cell
-INSERT INTO `IM_cell` (`UNIQUE_CELL_ID`, `UNIQUE_CELL_NAME`, `TYPE`, `ORGAN`, `CPID`, `ANATOMY_ID`, `CELL_TYPE_ID`)
-SELECT `UNIQUE_CELL_ID`, `UNIQUE_CELL_NAME`, `TYPE`, `ORGAN`, `CPID`, `ANATOMY_ID`, `CELL_TYPE_ID` 
-FROM `CP_cell`;
+-- A paradigm to generate auto key column
+/*
+SELECT @row := @row + 1 as CELL_ENTITY_ID, t.*
+FROM CP_cell t, (SELECT @row := 0) AS r 
+*/
 
+-- populate IM_cell using CP_cell
+INSERT INTO `IM_cell` (`CELL_ENTITY_ID`, `UNIQUE_CELL_ID`, `UNIQUE_CELL_NAME`, `TYPE`, `ORGAN`, `CPID`, `ANATOMY_ID`, `CELL_TYPE_ID`)
+SELECT `CELL_ENTITY_ID`,`UNIQUE_CELL_ID`, `UNIQUE_CELL_NAME`, `TYPE`, `ORGAN`, `CPID`, `ANATOMY_ID`, `CELL_TYPE_ID`
+FROM ( 
+	SELECT @row := @row + 1 as `CELL_ENTITY_ID`, t.*
+	FROM `CP_cell` t, (
+		SELECT @row := 0
+	) tmp_table
+) CP_cell_indexed;
+
+-- populate IM_cell_entity
+INSERT INTO IM_cell_entity (`ENTITY_TYPE`, `ID`)
+SELECT 'CELL', `CELL_ENTITY_ID` FROM `IM_cell`;
 
 /* add entries that are not curated in CellPedia database */
 /*
@@ -152,17 +160,40 @@ FROM `CP_cell`;
 # Mast.cells.activated -> Activated Master cell (54 + 1,000,000,001)
 */
 
-INSERT INTO `IM_cell` VALUES
-  (NULL, 1000000046, 'Resting Natural killer cell',             'Natural killer cell', 'Blood', NULL, NULL, 261),
-  (NULL, 1000000047, 'Activated Natural killer cell',           'Natural killer cell', 'Blood', NULL, NULL, 261),
-  (NULL, 1000000043, 'Resting Dendritic cell',                  'Dendritic cell',      'Blood', NULL, NULL, 32),
-  (NULL, 1000000044, 'Activated Dendritic cell',                'Dendritic cell',      'Blood', NULL, NULL, 32),
-  (NULL, 1000000054, 'Resting Mast cell',                       'Mast cell',           'Blood', NULL, NULL, 10),
-  (NULL, 1000000055, 'Activated Mast cell',                     'Mast cell',           'Blood', NULL, NULL, 10);
+-- A paradigm to get the next auto_increment key
+/*
+SELECT AUTO_INCREMENT
+FROM information_schema.tables
+WHERE table_name = 'IM_cell_entity'
+AND table_schema = DATABASE();
+*/
 
--- cell_entity
-insert into IM_cell_entity (ID)
-select `CELL_ENTITY_ID` from IM_cell;
-UPDATE IM_cell_entity SET ENTITY_TYPE='CELL';
+-- Generate Keys and Insert Values to IM_cell and IM_cell_entity
+DROP TABLE IF EXISTS `IM_cell_tmp`;
+CREATE TABLE `IM_cell_tmp` LIKE IM_cell;
+INSERT INTO `IM_cell_tmp` (`CELL_ENTITY_ID`, `UNIQUE_CELL_ID`, `UNIQUE_CELL_NAME`, `TYPE`, `ORGAN`, `CPID`, `ANATOMY_ID`, `CELL_TYPE_ID`)
+VALUES
+  (1, 1000000046, 'Resting Natural killer cell',             'Natural killer cell', 'Blood', NULL, NULL, 261),
+  (2, 1000000047, 'Activated Natural killer cell',           'Natural killer cell', 'Blood', NULL, NULL, 261),
+  (3, 1000000043, 'Resting Dendritic cell',                  'Dendritic cell',      'Blood', NULL, NULL, 32),
+  (4, 1000000044, 'Activated Dendritic cell',                'Dendritic cell',      'Blood', NULL, NULL, 32),
+  (5, 1000000054, 'Resting Mast cell',                       'Mast cell',           'Blood', NULL, NULL, 10),
+  (6, 1000000055, 'Activated Mast cell',                     'Mast cell',           'Blood', NULL, NULL, 10);
+SET @auto_shift_tmp := ( SELECT AUTO_INCREMENT
+	FROM information_schema.tables
+	WHERE table_name = 'IM_cell_entity'
+	AND table_schema = DATABASE() );
+UPDATE `IM_cell_tmp` SET `CELL_ENTITY_ID` = `CELL_ENTITY_ID` + @auto_shift_tmp;
+INSERT INTO `IM_cell`
+SELECT * FROM `IM_cell_tmp`;
+INSERT INTO `IM_cell_entity` (`ENTITY_TYPE`, `ID`)
+SELECT 'CELL', `CELL_ENTITY_ID` FROM `IM_cell_tmp`;
+-- SELECT * FROM IM_cell_tmp;
+-- SELECT `UNIQUE_CELL_NAME`, `CELL_ENTITY_ID` FROM IM_cell order by cell_entity_id desc limit 10;
+-- SELECT * FROM IM_cell_entity order by id desc limit 10;
+
+-- clean up
+DROP TABLE `IM_cell_tmp`;
+SET FOREIGN_KEY_CHECKS = 0;
 
 -- echo "docker exec -it cbioDB1 sh -c \"mysql -ucbio1 -pP@ssword1 cbioportal1\" "
