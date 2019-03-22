@@ -1,0 +1,16 @@
+5c5
+< db.user=cbio
+---
+> db.user=cbio1
+7,8c7,8
+< db.host=cbioDB
+< db.portal_db_name=cbioportal
+---
+> db.host=cbioDB1
+> db.portal_db_name=cbioportal1
+10c10,12
+< db.connection_string=jdbc:mysql://cbioDB/
+---
+> #for docker, this should always be the same as db.host
+> db.connection_string=jdbc:mysql://cbioDB1/
+> #for tomcat, this should always be the same as app.name
