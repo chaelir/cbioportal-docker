@@ -4,7 +4,6 @@
 # portal.properties and Dockerfile
 # for Bash compatibility, use "${var}" instead of '$var' or '${var}'
 
-set -x
 if [ -z $2 ]; then 
   echo "input a stage: \${stage}=dry | run_mysql | pop_mysql | build_cbio | run_cbio"
   echo "and a tag; e.g. \${tag}=v1.17h" 
@@ -19,6 +18,7 @@ if [ -z $2 ]; then
   exit
 fi
 
+set -x
 stage=$1
 tag=$2
 
@@ -37,6 +37,9 @@ fi
 
 ### define the portal.properties file to be configured by this init script ###
 immube_init_sql="${build_root}/db_IM/cgds_im.sql"
+# this file must be synced between portal and db
+cgds_init_sql="${build_root}/cbioportal/db-scripts/src/main/resources/cgds.sql"
+mysql_clean_sql="${build_root}/db_IM/cgds_clean.sql"
 #NOTE: all IM db scripts were merged into cgds_im.sql
 #biosql_init_sql="${build_root}/db_BS/BS_tables.init.sql"
 #cellpedia_init_sql="${build_root}/db_CP/CP_tables.init.sql"
@@ -45,6 +48,7 @@ immube_init_sql="${build_root}/db_IM/cgds_im.sql"
 #microbe_init_sql="${build_root}/db_IM/IM_microbe.init.sql"
 
 ### current configurable none portal.properties variables ###
+### all these will go some properties file, say immube.properties later
 docker_timezone="America/Los_Angeles"
 docker_restart="always"
 docker_network="cbio-net1"
@@ -53,7 +57,6 @@ docker_cbio_source="."
 #this points to the local path of cbio source code
 git_cbio_local="cbioportal"
 git_cbio_remote="https://github.com/chaelir/cbioportal.git"
-
 #local git source folder of cbioportal
 docker_cbio_image="cbioportal-${tag}"
 docker_cbio_instance="cbioPortal1"
@@ -63,7 +66,8 @@ docker_cbio_opt="'-Xms2g -Xmx4g'" #tricky quote issue, important to preserve quo
 docker_db_wait=10
 #how to choose seedDB? see: https://github.com/cBioPortal/datahub/tree/master/seedDB
 db_dataseed_path="${build_parent}/datahub/seedDB"
-db_dataseed_sql="seed-cbioportal_hg19_v2.6.0.sql.gz" 
+#this is linked to the cgds.sql version of the portal
+db_dataseed_sql="seed-cbioportal_hg19_v2.7.2.sql.gz" 
 db_runtime_path="${build_parent}/cbioportal-docker-runtime"
 db_datahub_path="${build_parent}/datahub"
 db_datahub_priv_path="${build_parent}/datahub_priv"
@@ -112,7 +116,7 @@ if [ $stage == 'run_mysql' ]; then
     -v ${db_datahub_path}/:/mnt/datahub/ \
     -v ${db_datahub_priv_path}/:/mnt/datahub_priv/ \
     -p ${docker_mysql_port}:3306 \
-    mysql:${tag}
+    mysql:5.7
   ### run mysql with seed database ###
   echo "Take Note: access the mysql db with the following command:"
   echo "docker exec -it ${db_host} /bin/bash -c \"mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}\""
@@ -127,14 +131,24 @@ fi
 ### prep mysql and cbio dbs ###
 if [ $stage == 'prep_mysql' ]; then
   sleep ${docker_db_wait} ## wait the db to initialize
+   docker run \
+    --net=${docker_network} \
+    -e TZ="${docker_timezone}" \
+    -v ${mysql_clean_sql}:/mnt/cgds_clean.sql:ro \
+    mysql:5.7 \
+    sh -c "cat /mnt/cgds_clean.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"    
   docker run \
     --net=${docker_network} \
     -e TZ="${docker_timezone}" \
-    -v ${db_dataseed_path}/cgds.sql:/mnt/cgds.sql:ro \
+    -v ${cgds_init_sql}:/mnt/cgds.sql:ro \
+    mysql:5.7 \
+    sh -c "cat /mnt/cgds.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
+  docker run \
+    --net=${docker_network} \
+    -e TZ="${docker_timezone}" \
     -v ${db_dataseed_path}/${db_dataseed_sql}:/mnt/seed.sql.gz:ro \
-    mysql:${tag} \
-    sh -c "cat /mnt/cgds.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name} \
-      && zcat /mnt/seed.sql.gz |  mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
+    mysql:5.7 \
+    sh -c "zcat /mnt/seed.sql.gz |  mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
 fi
 # docker exec -it cbioDB1 /bin/bash -c "mysql -hcbioDB1 -ucbio1 -pP@ssword1 cbioportal1"
 # docker logs cbioDB1
@@ -152,7 +166,7 @@ if [ $stage == 'prep_IM' ]; then
     --net=${docker_network} \
     -e TZ="${docker_timezone}" \
     -v ${immube_init_sql}:/mnt/immube.init.sql:ro \
-    mysql:${tag} \
+    mysql:5.7 \
     sh -c "cat /mnt/immube.init.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
 fi
 
@@ -209,3 +223,6 @@ if [ $stage == 'load_cbio' ]; then
       -s /mnt/datahub_priv/${study} -o"
   done
 fi
+
+### get an interactive mysql
+# docker exec -it cbioDB1 sh -c "mysql -ucbio1 -pP@ssword1 cbioportal1" 
