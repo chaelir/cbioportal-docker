@@ -61,7 +61,7 @@ write.table(grammy_export, file='~/setup/cbioportal-docker/example/testing/data_
 # in IM_cell and IM_microbe, 
 # we must require NCBI_TAXON_NAME and NCBI_TAXON_ID fields unique
 
-### CP DEBUG PROCESS (DATA LOADING):
+### Cell HACK PROCESS (DATA LOADING):
 # 1. fix existing MI_cell tables [DONE] 
 #   1.1 rename CELLPEDIA_CELL_TYPE_NAME -> UNIQUE_CELL_NAME; use _ concatenated name
 #   1.2 rename CELLPEDIA_CELL_TYPE_ID -> UNIQUE_CELL_ID; use x100+subs
@@ -72,26 +72,36 @@ write.table(grammy_export, file='~/setup/cbioportal-docker/example/testing/data_
 
 # 3. modify core/src/main files
 #   3.0 Start with a working cbioportal and always make sure it works after each change
-#   3.1 hack cbioportal/core/src/main/java/org/mskcc/cbio/portal/model/*Cell*.java: 
-#       CanonicalCell.java              Cell.java                    CellAlterationType.java        CellProfile.java
-#   3.2 hack cbioportal/core/src/main/java/org/mskcc/cbio/portal/scripts/*Cell*.java: 
-#       ImportCellProfileData.java      ExportCellProfileData.java 
+#   3.1 basename core/src/main/java/org/mskcc/cbio/portal/model/*Cell*.java
+#       CanonicalCell.java
+#       Cell.java
+#       CellAlterationType.java
+#       CellProfile.java
+#   3.2 basename core/src/main/java/org/mskcc/cbio/portal/scripts/*Cell*.java
+#       No files were affected yet.
 
 # 4. modify core/src/test files
 #   4.0 Start with a working cbioportal and always make sure it works after each change
-#   4.1 check cbioportal/core/src/test/java/org/mskcc/cbio/portal/model/*Cell*.java: 
+#   4.1 basename core/src/test/java/org/mskcc/cbio/portal/model/*Cell*.java
 #       No files were affected.
-#   4.2 check cbioportal/core/src/test/java/org/mskcc/cbio/portal/scripts/*Cell*.java: 
-#       ImportCellProfileData.java 
+#   4.2 basename core/src/test/java/org/mskcc/cbio/portal/dao/*Cell*.java
+#       TestDaoCell.java
+#       TestDaoCellAlteration.java
+#       TestDaoCellProfile.java
+#   4.3 basename core/src/test/java/org/mskcc/cbio/portal/scripts/*Cell*.java
+#       No files were affected yet.
 
 # 5. test portal using cbio.hack.sh test core
 #   5.0 Start with a working cbioportal and always make sure it works after each change
-#   5.1 Fix DaoTextCache error [DONE: 3ef640007]
+#   5.1 Fixed DaoTextCache error [DONE: 3ef640007]
 #   5.2 Add cgds_im.init.sh to generate the seed IM database cgds_im.sql by dumping IM_tables 
-#   5.3 Add the cgds_im.sql to cbioportal/db-scripts/src/main/resources and Make sure maven test master works
+#   5.3 Add cgds_im.sql to cbioportal/db-scripts/src/main/resources and Make sure maven test master works
+#   5.4 various changes that lead to working portal version v1.17h -> set as stable
+#       5.4.1 cbio.devel.sh integration-test core [OK]
+#   5.5 branch devel from v1.17h -> use as debug
 
-# 5. try scripts/metaImport.py
-#   5.1 run it and check database change
+# 6. try scripts/metaImport.py
+#   6.1 run it and check database change
 
 
 ### DEBUG PROCESS (DATA PRESENTATION):
