@@ -1,3 +1,51 @@
+# cbioportal-docker @ Chaelir #
+
+## Instructions ##
+
+### For users ###
+Identify a branch you would like to use, e.g. v1.17h for cbioportal and 5.7 for mysql.
+Deploy the instances based on this choice.
+```
+./cbio.deploy.sh build_cbio v1.17h
+./cbio.deploy.sh run_mysql 5.7 
+./cbio.deploy.sh prep_mysql 5.7 
+./cbio.deploy.sh run_cbio v1.17h
+./cbio.deploy.sh load_cbio v1.17h
+
+```
+Now check your browser at http://localhost:8882/cbioportal/
+
+### For developers ###
+1. Start with the code of a working branch at both cbioportal-docker and cbioportal, say v1.17h.
+Process exactly the same as above.
+
+2. Create a tag name you would like your code be in deploy, e.g. devel
+Creat a new set of editable tag-specific Dockerfile and portal.properties files.
+Create patches that would regenerate the tag-specific Dockerfile and portal.properties files.
+```
+cp Dockerfile.v1.17h.edit Dockerfile.devel.edit 
+cp portal.properties.v1.17h.edit portal.properties.devel.edit
+diff Dockerfile Dockerfile.devel.edit >Dockerfile.devel.patch
+diff portal.properties portal.properties.v1.17h >portal.properties.devel.patch
+```
+Create git branches devel for both cbioportal and cbioportal-docker to store your changes.
+
+3. Do your modification and incrementally build and test.
+Use clean to trash intermediatary files.
+Keep the cbioportal/db-scripts/src/main/resources/cgds_im.sql synced with db_IM/cgds_im.sql.
+```
+cp db_IM/cgds_im.sql cbioportal/db-scripts/src/main/resources/cgds_im.sql
+./cbio.devel.sh clean core
+./cbio.devel.sh integration-test core
+./cbio.deploy.sh build_cbio devel
+./cbio.deploy.sh run_mysql 5.7 
+./cbio.deploy.sh prep_mysql 5.7 
+./cbio.deploy.sh run_cbio devel
+./cbio.deploy.sh load_cbio devel
+```
+When you are done, push your changes to the remote 
+
+# Originally by The Hyve #
 # cbioportal-docker @ The Hyve #
 
 The [cBioPortal](https://github.com/cBioPortal/cbioportal) project documents a setup to deploy a cBioPortal server using Docker, in [this section of the documentation](https://cbioportal.readthedocs.io/en/latest/#docker). As cBioPortal traditionally does not distinguish between build-time and deploy-time configuration, the setup documented there builds the application at runtime, and suggests running auxiliary commands in the same container as the webserver. The above approach may sacrifice a few advantages of using Docker by going against some of its idioms. For this reason, the project you are currently looking at documents an alternative setup, which builds a ready-to-run cBioPortal application into a Docker image.
@@ -7,6 +55,8 @@ To get started, download and install Docker from www.docker.com.
 [Notes for non-Linux systems](docs/notes-for-non-linux.md)
 
 ## Usage instructions ##
+
+This guide supercedes the original Hyve guide if you are using the branch by chaelir
 
 ### Step 1 - Setup network ###
 Create a network in order for the cBioPortal container and mysql database to communicate.
