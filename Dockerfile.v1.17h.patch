@@ -1,5 +1,6 @@
-29c29,30
+29c29,31
 < RUN git clone --depth 1 -b v1.17.1+backport4787-4917-5057 'https://github.com/thehyve/cbioportal.git' $PORTAL_HOME
 ---
 > #RUN git clone --depth 1 -b v1.17.1+backport4787-4917-5057 'https://github.com/thehyve/cbioportal.git' $PORTAL_HOME
-> #The source code folder is assumed present already 
+> #The source code folder cbioportal is assumed present already 
+> ADD cbioportal $PORTAL_HOME
