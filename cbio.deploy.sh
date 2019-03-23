@@ -62,11 +62,11 @@ docker_mysql_port=3337
 docker_cbio_opt="'-Xms2g -Xmx4g'" #tricky quote issue, important to preserve quote this way
 docker_db_wait=10
 #how to choose seedDB? see: https://github.com/cBioPortal/datahub/tree/master/seedDB
-db_dataseed_path="${parent_root}/datahub/seedDB"
+db_dataseed_path="${build_parent}/datahub/seedDB"
 db_dataseed_sql="seed-cbioportal_hg19_v2.6.0.sql.gz" 
-db_runtime_path="${parent_root}/cbioportal-docker-runtime"
-db_datahub_path="${parent_root}/datahub"
-db_datahub_priv_path="${parent_root}/datahub_priv"
+db_runtime_path="${build_parent}/cbioportal-docker-runtime"
+db_datahub_path="${build_parent}/datahub"
+db_datahub_priv_path="${build_parent}/datahub_priv"
 db_public_studies=('coadread_tcga')
 db_private_studies=()
 

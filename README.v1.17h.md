@@ -13,7 +13,7 @@ Deploy the instances based on this choice.
 ./cbio.deploy.sh load_cbio v1.17h
 
 ```
-Now check your browser at http://localhost:8882
+Now check your browser at http://localhost:8882/cbioportal/
 
 ### For developers ###
 1. Start with the code of a working branch at both cbioportal-docker and cbioportal, say v1.17h.
