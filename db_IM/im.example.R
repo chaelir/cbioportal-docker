@@ -42,6 +42,8 @@ write.table(cibersort_export, file='~/setup/cbioportal-docker/example/testing/da
 # 1. create example/meta_linear_CRA.txt;
 # 2. create example/meta_linear_MRA.txt;
 # 3. apply patches to cbioportal/core/src/main/scripts/importer/*
+# This assumes IM_cell.UniqueCellName must also concatenamte by _, all upper case and deduped, 
+# for the cleaning CP names c.f. CP.clean.R
 
 grammy_raw <- read_csv("~/setup/cbioportal-docker/archive/guo_results_sum.csv")
 grammy_sample_ids = stringr::str_extract(grammy_raw$ID, "TCGA-.{2}-.{4}-.{2}") #TCGA-AA-3516-01
@@ -103,6 +105,10 @@ write.table(grammy_export, file='~/setup/cbioportal-docker/example/testing/data_
 # 6. try scripts/metaImport.py
 #   6.1 run it and check database change
 
+
+#Database to do: add IM_sample_cell_profile
+#Database to do: add IM_cell_profile_samples
+#Database to do: add IM_cell_profile_link
 
 ### DEBUG PROCESS (DATA PRESENTATION):
 # 1. add a Cell Composition view http://localhost:8881/cbioportal/study?id=coadread_tcga#cra

@@ -61,9 +61,10 @@ cat ${im_cell_init_sql} | mysql -ucgds_im_user -ppassword cgds_im
 echo "/* LICENSE_TBD */" >cgds_im.sql
 echo "SET NAMES utf8mb4;" >>cgds_im.sql
 echo "SET FOREIGN_KEY_CHECKS = 0;" >>cgds_im.sql
-mysqldump --skip-extended-insert --skip-add-locks -ucgds_im_user -ppassword cgds_im IM_cell_entity IM_cell IM_cell_profile IM_cell_alteration IM_cell_alias IM_cell_profile_samples IM_cell_profile_link | sed -e "s/\\\'/''/g" | cat >>cgds_im.sql
+mysqldump --skip-extended-insert --skip-add-locks -ucgds_im_user -ppassword cgds_im IM_cell_entity IM_cell IM_cell_profile IM_cell_alteration IM_cell_alias IM_cell_profile_samples IM_cell_profile_link IM_sample_cell_profile | sed -e "s/\\\'/''/g" | cat >>cgds_im.sql
 echo "SET FOREIGN_KEY_CHECKS = 1;" >>cgds_im.sql
 cp cgds_im.sql ../cbioportal/db-scripts/src/main/resources 
+cp cgds_clean.sql ../cbioportal/core/src/test/resources
 # for an updated cgds_im.sql script to be effective, need:
 # 0. cbio.devel.sh prep_db
 # 1. cbio.devel.sh install db-scripts
