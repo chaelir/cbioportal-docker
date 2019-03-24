@@ -75,8 +75,10 @@ cp cell_profile_test.txt ../cbioportal/core/src/test/resources
 # for an updated cgds_im.sql script to be effective, need:
 # 0. cbio.devel.sh prep_db
 # 1. cbio.devel.sh install db-scripts
-# 2. cbio.devel.sh integration-test core
-# 3. mysql -ucbio_user -psomepassword cgds_test
+# 2. cbio.devel.sh pre-integration-test core ### that's the step to load sql
+# 4. cbio.devel.sh integration-test core -Dtest=TestGetCellProfileData
+# 3. mysql -ucbio_user -psomepassword cgds_test ### monitor cgds_test
+# 5. cbio.devel.sh integration-test core
 
 #NOTE: b/c of dependency table dumping order is important. A simply dump like the following does not work!
 #NOTE: add --skip-add-locks to avoid LOCK/UNLOCK statements in the dumped sql
