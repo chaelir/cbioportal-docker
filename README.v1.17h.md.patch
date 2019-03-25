@@ -1,0 +1,94 @@
+6c6
+< Identify a branch you would like to use, e.g. v1.17h for cbioportal and mysql.
+---
+> Identify a branch you would like to use, e.g. v1.17h.
+10,11c10,11
+< ./cbio.deploy.sh run_mysql v1.17h 
+< ./cbio.deploy.sh prep_mysql v1.17h
+---
+> ./cbio.deploy.sh run_mysql v1.17h
+> ./cbio.deploy.sh prep_mysql v1.17h 
+33c33,91
+< 3. Do your modification and incrementally build and test.
+---
+> 3. Debug your modification with a local portal with tomcat
+> (see notes/2018Sep23.cbio.local.rst)
+> local portal configuration in src/main/resources/portal.properties
+> local log configuration in src/main/resources/log4j.properties
+> ```
+> ### Handling dependency
+> Brew install git-lfs
+> brew install mysql@5.7 #very version picky, has to use mysql57
+> brew install maven
+> brew install tomcat@8
+> brew install mysql-java
+> pip install mysql-python
+> mysql_upgrade -u root -p password --force
+> Brew services start tomcat@8
+> Brew services start mysql@5.7
+> ### Handling mysql
+> # It is important to always grant access to cgds_test.* and cbioportal.* that both test and tomcat will work
+> mysql --user root --password=password -ve "CREATE DATABASE cbioportal"
+> mysql --user root --password=password -ve "CREATE USER 'cbio_user'@'localhost' IDENTIFIED BY 'somepassword'"
+> mysql --user root --password=password -ve "GRANT ALL ON cbioportal.* TO 'cbio_user'@'localhost'"
+> mysql --user root --password=password -ve "GRANT ALL ON cgds_test.* TO 'cbio_user'@'localhost'"
+> mysql --user root --password=password -ve "flush privileges"
+> mysql --user=cbio_user --password=somepassword cbioportal < ${PORTAL_HOME}/db-scripts/src/main/resources/cgds.sql
+> mysql --user=cbio_user --password=somepassword cbioportal < ${PORTAL_HOME}/db-scripts/src/main/resources/cgds_im.sql
+> #It may be necessary to change time_zone that fi tomcat reports 404 error
+> mysql --verbose --help | grep my.cnf
+> # set default-time-zone that works for tomcat
+> echo "[mysqld] \n default-time-zone='+00:00'" >~/my.cnf # my.cnf depends 
+> ### Handling tomcat
+> #these variables are now defined in my ~/.bash_profile 
+> #export CATALINA_HOME="/usr/local/opt/tomcat@8/libexec"
+> #export CATALINA_OPTS='-Dauthenticate=false' #guess this overrides property file
+> echo 'CATALINA_OPTS="-Dauthenticate=false $CATALINA_OPTS -Ddbconnector=dbcp -XX:MaxPermSize=256m"' >$CATALINA_HOME/bin/setenv.sh
+> brew services restart tomcat@8 #MUST use brew services to start/stop
+> wget https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war -O $CATALINA_HOME/webapps/sample.war # a small test
+> ls $CATALINA_HOME/logs #all the logs went here
+> pushd $CATALINA_HOME/lib
+> wget https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.15.tar.gz
+> tar -zxvf mysql-connector-java-8.0.15.tar.gz --strip-components=1 mysql-connector-java-8.0.15/mysql-connector-java-8.0.15.jar
+> mv mysql-connector-java-8.0.15.jar mysql-connector-java.jar
+> popd
+> cp log4j.properties cbioportal/src/main/resources/
+> patch $CATALINA_HOME/conf/server.xml <${PORTAL_HOME}/../catalina_server.xml.patch
+> 
+> lsof -i:8080 -i:8005 #find competing tomcat instances
+> brew services restart tomcat@8
+> #add stuff to $CATALINA_HOME/conf/context.xml # sync password and username with portal.properties.tomcat
+> #see https://cbioportal.readthedocs.io/en/latest/Deploying.html
+> ### Handling cbioportal
+> export PORTAL_HOME=$HOME/setup/cbioportal-docker/cbioportal
+> pushd $PORTAL_HOME 
+> ln -s portal.properties.tomcat portal.properties
+> mvn -DskipTests clean install
+> sudo cp $PORTAL_HOME/portal/target/cbioportal-*.war $CATALINA_HOME/webapps/cbioportal.war
+> brew services restart mysql@5.7 #MUST use brew services to start/stop
+> brew services restart comcat@8
+> ```
+> 
+> 4. Do your modification and incrementally build and test with local tomcat.
+35c93,94
+< Keep the cbioportal/db-scripts/src/main/resources/cgds_im.sql synced with db_IM/cgds_im.sql.
+---
+> Keep the cbioportal/db-scripts/src/main/resources/* synced with db_IM/*.
+> Keep the ../datahub/custom/crc_tcga/* synced with example/*.
+37c96,99
+< cp db_IM/cgds_im.sql cbioportal/db-scripts/src/main/resources/cgds_im.sql
+---
+> pushd db_IM
+> ./cgds_im.init.sh
+> popd db_IM
+> ./cbio.devel.sh prep_db
+39a102
+> ./cbio.devel.sh integration-test core -Dtest=TestDaoCellProfile
+41,42c104,105
+< ./cbio.deploy.sh run_mysql  devel
+< ./cbio.deploy.sh prep_mysql devel 
+---
+> ./cbio.deploy.sh run_mysql devel
+> ./cbio.deploy.sh prep_mysql devel
+58d120
+< 

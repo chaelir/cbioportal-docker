@@ -1,4 +1,12 @@
-29c29,31
+12a13
+>     vim \
+24c25,27
+< 	&& rm -rf $CATALINA_HOME/webapps/*m* 
+---
+> 	&& rm -rf $CATALINA_HOME/webapps/*m* \
+>   && git config --global user.email "xia@stanford.gmail" \
+>   && git config --global user.name "CX"
+29c32,34
 < RUN git clone --depth 1 -b v1.17.1+backport4787-4917-5057 'https://github.com/thehyve/cbioportal.git' $PORTAL_HOME
 ---
 > #RUN git clone --depth 1 -b v1.17.1+backport4787-4917-5057 'https://github.com/thehyve/cbioportal.git' $PORTAL_HOME
