@@ -10,6 +10,8 @@ MAINTAINER Fedde Schaeffer <fedde@thehyve.nl>
 # install build and runtime dependencies and configure Tomcat for production
 RUN apt-get update --fix-missing
 RUN apt-get install -y --no-install-recommends --fix-missing \
+    vim
+RUN apt-get install -y --no-install-recommends --fix-missing \
 		git \
 		libmysql-java \
 		maven \

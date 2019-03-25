@@ -5,7 +5,7 @@
 # for Bash compatibility, use "${var}" instead of '$var' or '${var}'
 
 if [ -z $2 ]; then 
-  echo "input a stage: \${stage}=dry | run_mysql | pop_mysql | build_cbio | run_cbio"
+  echo "input a stage: \${stage}=dry | run_mysql | prep_mysql | build_cbio | run_cbio | load_cbio"
   echo "and a tag; e.g. \${tag}=v1.17h" 
   echo "  ./cbio.deploy.sh build_cbio v1.17h"
   echo "in the case a tag is provided"
@@ -131,12 +131,12 @@ fi
 ### prep mysql and cbio dbs ###
 if [ $stage == 'prep_mysql' ]; then
   sleep ${docker_db_wait} ## wait the db to initialize
-   docker run \
-    --net=${docker_network} \
-    -e TZ="${docker_timezone}" \
-    -v ${mysql_clean_sql}:/mnt/cgds_clean.sql:ro \
-    mysql:5.7 \
-    sh -c "cat /mnt/cgds_clean.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"    
+  # docker run \
+  #  --net=${docker_network} \
+  #  -e TZ="${docker_timezone}" \
+  #  -v ${mysql_clean_sql}:/mnt/cgds_clean.sql:ro \
+  #  mysql:5.7 \
+  #  sh -c "cat /mnt/cgds_clean.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"    
   docker run \
     --net=${docker_network} \
     -e TZ="${docker_timezone}" \
