@@ -7,9 +7,11 @@ cp README.devel.md.edit README.v1.17h.md.edit
 diff README.md README.v1.17h.md.edit >README.v1.17h.md.patch
 git commit -a
 git push
+git checkout devel
 pushd cbioportal
 git checkout v1.17h
 git merge devel
 git commit -a
 git push
+git checkout devel
 popd
