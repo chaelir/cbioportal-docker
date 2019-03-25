@@ -119,6 +119,21 @@ CREATE TABLE `IM_cell_profile_link` (
   CONSTRAINT `im_cell_profile_link_x_cell_profile_2` FOREIGN KEY (`REFERRED_CELL_PROFILE_ID`) REFERENCES `IM_cell_profile` (`CELL_PROFILE_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- ----------------------------
+--  Table structure for `IM_sample_cell_profile`
+-- ----------------------------
+
+CREATE TABLE `IM_sample_cell_profile` (
+  `SAMPLE_ID` int(11) NOT NULL,
+  `CELL_PROFILE_ID` int(11) NOT NULL,
+  `PANEL_ID` int(11) DEFAULT NULL,
+  UNIQUE KEY `UQ_SAMPLE_ID_CELL_PROFILE_ID` (`SAMPLE_ID`,`CELL_PROFILE_ID`), -- Constraint to allow each sample only once in each profile
+  KEY (`SAMPLE_ID`),
+  FOREIGN KEY (`CELL_PROFILE_ID`) REFERENCES `IM_cell_profile` (`CELL_PROFILE_ID`) ON DELETE CASCADE,
+  FOREIGN KEY (`SAMPLE_ID`) REFERENCES `sample` (`INTERNAL_ID`) ON DELETE CASCADE
+);
+-- FOREIGN KEY (`PANEL_ID`) REFERENCES `IM_gene_panel` (`INTERNAL_ID`) ON DELETE RESTRICT
+
 /* populate cell entries from CP */
 
 -- A paradigm to generate auto key column

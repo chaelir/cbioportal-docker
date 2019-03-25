@@ -28,11 +28,20 @@ fi
 
 set -x
 
-if [[ $1 == "prep_db" ]]; then
+if [[ $1 == "prep_cgds" ]]; then
+  #cgds will often be cleaned while cbioportal is relatively stable
   mysql --user root --password=password -ve "DROP DATABASE IF EXISTS cgds_test; CREATE DATABASE cgds_test"
   mysql --user root --password=password -ve "DROP USER IF EXISTS 'cbio_user'@'localhost'; CREATE USER 'cbio_user'@'localhost' IDENTIFIED BY 'somepassword'"
   mysql --user root --password=password -ve "GRANT ALL ON cgds_test.* TO 'cbio_user'@'localhost'"
+  mysql --user root --password=password -ve "GRANT ALL ON cbioportal.* TO 'cbio_user'@'localhost'"
   mysql --user root --password=password -ve "flush privileges"
+if [[ $1 == "prep_tomcat" ]]; then
+  mysql --user root --password=password -ve "CREATE DATABASE cbioportal"
+  mysql --user root --password=password -ve "CREATE USER 'cbio_user'@'localhost' IDENTIFIED BY 'somepassword'"
+  mysql --user root --password=password -ve "GRANT ALL ON cbioportal.* TO 'cbio_user'@'localhost'"
+  mysql --user root --password=password -ve "flush privileges"
+  mysql --user=cbio_user --password=somepassword cbioportal < ${PORTAL_HOME}/db-scripts/src/main/resources/cgds.sql
+  mysql --user=cbio_user --password=somepassword cbioportal < ${PORTAL_HOME}/db-scripts/src/main/resources/cgds_im.sql
 elif [[ $1 == "prep_dep" ]]; then
   #deps = ('business',  'db-scripts', 'service')  
   dep=$2

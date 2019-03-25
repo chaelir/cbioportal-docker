@@ -5,7 +5,7 @@
 # for Bash compatibility, use "${var}" instead of '$var' or '${var}'
 
 if [ -z $2 ]; then 
-  echo "input a stage: \${stage}=dry | run_mysql | pop_mysql | build_cbio | run_cbio"
+  echo "input a stage: \${stage}=dry | run_mysql | prep_mysql | build_cbio | run_cbio | load_cbio"
   echo "and a tag; e.g. \${tag}=v1.17h" 
   echo "  ./cbio.deploy.sh build_cbio v1.17h"
   echo "in the case a tag is provided"
@@ -71,8 +71,9 @@ db_dataseed_sql="seed-cbioportal_hg19_v2.7.2.sql.gz"
 db_runtime_path="${build_parent}/cbioportal-docker-runtime"
 db_datahub_path="${build_parent}/datahub"
 db_datahub_priv_path="${build_parent}/datahub_priv"
-db_public_studies=('coadread_tcga')
-db_private_studies=()
+db_public_studies=('public/coadread_tcga')
+#db_private_studies=('custom/crc_tcga')
+db_private_studies=('')
 
 ### read additional variables from teh property file
 
@@ -131,12 +132,12 @@ fi
 ### prep mysql and cbio dbs ###
 if [ $stage == 'prep_mysql' ]; then
   sleep ${docker_db_wait} ## wait the db to initialize
-   docker run \
-    --net=${docker_network} \
-    -e TZ="${docker_timezone}" \
-    -v ${mysql_clean_sql}:/mnt/cgds_clean.sql:ro \
-    mysql:5.7 \
-    sh -c "cat /mnt/cgds_clean.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"    
+  # docker run \
+  #  --net=${docker_network} \
+  #  -e TZ="${docker_timezone}" \
+  #  -v ${mysql_clean_sql}:/mnt/cgds_clean.sql:ro \
+  #  mysql:5.7 \
+  #  sh -c "cat /mnt/cgds_clean.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"    
   docker run \
     --net=${docker_network} \
     -e TZ="${docker_timezone}" \
@@ -157,7 +158,7 @@ fi
 #    -e MYSQL_PASSWORD=${db_password} \
 
 ### prep immube database ###
-if [ $stage == 'prep_IM' ]; then
+if [ $stage == 'prep_mysql_im' ]; then
   if [[ -z ${immube_init_sql} ]]; then
     echo "immube database file not found: ${immube_init_sql}" 
     exit
@@ -183,6 +184,24 @@ if [ $stage == 'build_cbio' ]; then
 	#docker build --no-cache -t ${docker_cbio_image} -f ${docker_cbio_dockerfile} ${docker_cbio_source}
   #you will need --no-cache if you haven't build a thing for a while to avoid apt source not found errors...
   exit
+fi
+
+### rerun cbio portal service with changes saved to image ###
+if [ $stage == 'rerun_cbio' ]; then
+  docker stop ${docker_cbio_instance}
+  docker commit ${docker_cbio_instance} ${docker_cbio_image}
+  docker rm -f ${docker_cbio_instance}
+  docker run -d --restart=${docker_restart} \
+    --name=${docker_cbio_instance} \
+    --net=${docker_network} \
+    -e TZ="${docker_timezone}" \
+    -e CATALINA_OPTS='${docker_cbio_opt}' \
+    -v ${db_datahub_path}/:/mnt/datahub/ \
+    -v ${db_datahub_priv_path}/:/mnt/datahub_priv/ \
+    -p ${docker_cbio_port}:8080 \
+		${docker_cbio_image}
+  # property file must be hard copied to container
+  docker cp ${portal_configure_file} ${docker_cbio_instance}:/cbioportal/portal.properties
 fi
 
 ### run cbio portal service ###
@@ -215,7 +234,7 @@ if [ $stage == 'load_cbio' ]; then
   for study in ${db_public_studies[@]}; do
     docker exec -it ${docker_cbio_instance} bash -c \
       "metaImport.py -u http://localhost:8080/cbioportal \
-      -s /mnt/datahub/public/${study} -o"
+      -s /mnt/datahub/${study} -o"
   done
   for study in ${db_private_studies[@]}; do
     docker exec -it ${docker_cbio_instance} bash -c \

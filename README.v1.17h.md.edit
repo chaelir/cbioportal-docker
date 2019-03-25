@@ -3,12 +3,12 @@
 ## Instructions ##
 
 ### For users ###
-Identify a branch you would like to use, e.g. v1.17h for cbioportal and 5.7 for mysql.
+Identify a branch you would like to use, e.g. v1.17h for cbioportal and mysql.
 Deploy the instances based on this choice.
 ```
 ./cbio.deploy.sh build_cbio v1.17h
-./cbio.deploy.sh run_mysql 5.7 
-./cbio.deploy.sh prep_mysql 5.7 
+./cbio.deploy.sh run_mysql v1.17h 
+./cbio.deploy.sh prep_mysql v1.17h
 ./cbio.deploy.sh run_cbio v1.17h
 ./cbio.deploy.sh load_cbio v1.17h
 
@@ -38,8 +38,8 @@ cp db_IM/cgds_im.sql cbioportal/db-scripts/src/main/resources/cgds_im.sql
 ./cbio.devel.sh clean core
 ./cbio.devel.sh integration-test core
 ./cbio.deploy.sh build_cbio devel
-./cbio.deploy.sh run_mysql 5.7 
-./cbio.deploy.sh prep_mysql 5.7 
+./cbio.deploy.sh run_mysql  devel
+./cbio.deploy.sh prep_mysql devel 
 ./cbio.deploy.sh run_cbio devel
 ./cbio.deploy.sh load_cbio devel
 ```

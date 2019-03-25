@@ -95,29 +95,38 @@ stopifnot(assertthat::are_equal(length(CP_celltype$CELL_TYPE_NAME), length(uniqu
 # CPID is unique
 # replace CP_dups$Cell_ID by CP_dups$True_Cell_ID
 
-#replace the Cell Type Id by its first occurrence of the same name (CP_dups)
+#replace the Cell Type Id and Cell Type by its first occurrence of the same name (CP_dups)
 #which(!is.na(match(cellpedia_differentiated$`Cell Type Id`, CP_dups$Cell_ID)))
 cellpedia_differentiated$`Cell Type Id` = 
   ifelse(is.na(match(cellpedia_differentiated$`Cell Type Id`, CP_dups$Cell_ID)),
                cellpedia_differentiated$`Cell Type Id`,
-               CP_dups$True_Cell_ID[match(cellpedia_differentiated$`Cell Type Id`, CP_dups$Cell_ID)]) 
-CP_cell = tibble::tibble(CPID = cellpedia_differentiated$No.)
-CP_cell$UNIQUE_CELL_ID = CP_cell$CPID
-CP_cell$UNIQUE_CELL_NAME = paste(cellpedia_differentiated$`Cell Type`, " CPID=", CP_cell$CPID, sep='')
+               CP_dups$True_Cell_ID[match(cellpedia_differentiated$`Cell Type Id`, CP_dups$Cell_ID)])
+cellpedia_differentiated$`Cell Type` = CP_celltype$CELL_TYPE_NAME[match(
+  cellpedia_differentiated$`Cell Type Id`, CP_celltype$CELL_TYPE_ID)]
+
+#add auxilary columns for introducing Unique Id and Unique Name
+cellpedia_differentiated = cellpedia_differentiated %>%
+  dplyr::group_by(`Cell Type`) %>%
+  dplyr::mutate( name_count = sequence(n())) %>%
+  dplyr::mutate( Dedup_Cell_Type_Suffix = ifelse(name_count==1, '', paste("CPID", `No.`, sep='=')) ) %>%
+  dplyr::mutate( Dedup_Cell_Type = ifelse(Dedup_Cell_Type_Suffix=='', 
+                                             `Cell Type`, paste(`Cell Type`, Dedup_Cell_Type_Suffix)))
+CP_cell = tibble::tibble(UNIQUE_CELL_ID = cellpedia_differentiated$No.)
+CP_cell$UNIQUE_CELL_NAME = toupper(gsub(' ', '_', cellpedia_differentiated$`Dedup_Cell_Type`))
 CP_cell$TYPE = cellpedia_differentiated$`Cell Type`
 CP_cell$ORGAN = cellpedia_differentiated$`Organ`
-CP_cell$LENGTH = NA
 CP_cell$ANATOMY_ID = cellpedia_differentiated$`Anatomy Id`
 CP_cell$CELL_TYPE_ID = cellpedia_differentiated$`Cell Type Id`
-CP_cell = cbind(CP_cell, cellpedia_differentiated)
+CP_cell = dplyr::bind_cols(CP_cell, cellpedia_differentiated)
 CP_cell = CP_cell %>%
-  filter(ANATOMY_ID %in% CP_anatomy$ANATOMY_ID) %>%
-  filter(CELL_TYPE_ID %in% CP_celltype$CELL_TYPE_ID) %>%
-  select(-c(CPID)) %>%
+  dplyr::filter(ANATOMY_ID %in% CP_anatomy$ANATOMY_ID) %>%
+  dplyr::filter(CELL_TYPE_ID %in% CP_celltype$CELL_TYPE_ID) %>%
   plyr::rename(c("No." = "CPID")) %>%
   plyr::rename(c("Anatomy Id" = "Raw Anatomy Id")) %>%
   plyr::rename(c("Cell Type Id" = "Raw Cell Type Id")) %>%
-  select(-c(Organ))
+  dplyr::select(-c("Organ", "Dedup_Cell_Type_Suffix", "Dedup_Cell_Type", "name_count"))
+stopifnot(assertthat::are_equal(length(CP_cell$UNIQUE_CELL_ID), length(unique(CP_cell$UNIQUE_CELL_ID))))
+stopifnot(assertthat::are_equal(length(CP_cell$UNIQUE_CELL_NAME), length(unique(CP_cell$UNIQUE_CELL_NAME))))
   
 # remove inconsistent entries 
 # sel=!CP_cell$ANATOMY_ID %in% CP_anatomy$ANATOMY_ID
