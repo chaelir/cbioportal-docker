@@ -3,12 +3,12 @@
 ## Instructions ##
 
 ### For users ###
-Identify a branch you would like to use, e.g. v1.17h for cbioportal and 5.7 for mysql.
+Identify a branch you would like to use, e.g. v1.17h for cbioportal and mysql.
 Deploy the instances based on this choice.
 ```
 ./cbio.deploy.sh build_cbio v1.17h
-./cbio.deploy.sh run_mysql 5.7 
-./cbio.deploy.sh prep_mysql 5.7 
+./cbio.deploy.sh run_mysql v1.17h 
+./cbio.deploy.sh prep_mysql v1.17h
 ./cbio.deploy.sh run_cbio v1.17h
 ./cbio.deploy.sh load_cbio v1.17h
 
