@@ -79,6 +79,7 @@ cp cell_profile_test.txt ../cbioportal/core/src/test/resources
 # 4. cbio.devel.sh integration-test core -Dtest=TestGetCellProfileData
 # 3. mysql -ucbio_user -psomepassword cgds_test ### monitor cgds_test
 # 5. cbio.devel.sh integration-test core
+# 6. ./cbio.devel.sh pre-integration-test core && ./cbio.devel.sh integration-test core -Dtest=TestImportCellProfileData
 
 #NOTE: b/c of dependency table dumping order is important. A simply dump like the following does not work!
 #NOTE: add --skip-add-locks to avoid LOCK/UNLOCK statements in the dumped sql
