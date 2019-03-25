@@ -37,7 +37,7 @@ cibersort_index = tibble::as_tibble( list(
     Cellpedia_Cell_Type_Name = gsub(' ', '_', cell_im_names)
 ))
 cibersort_export = cbind(cibersort_index, cibersort_export)
-write.table(cibersort_export, file='~/setup/cbioportal-docker/example/testing/data_linear_CRA.txt', 
+write.table(cibersort_export, file='~/setup/cbioportal-docker/example/testing/example_linear_CRA.txt', 
             quote = F, col.names = T, row.names = F, sep='\t')
 # 1. create example/meta_linear_CRA.txt;
 # 2. create example/meta_linear_MRA.txt;
@@ -56,7 +56,7 @@ grammy_index = tibble::as_tibble( list(
   NCBI_Taxonomy_ID = microbe_im_ids
 ))
 grammy_export = cbind(grammy_index, grammy_export)              #205 samples
-write.table(grammy_export, file='~/setup/cbioportal-docker/example/testing/data_linear_MRA.txt', 
+write.table(grammy_export, file='~/setup/cbioportal-docker/example/testing/example_linear_MRA.txt', 
             quote = F, col.names = T, row.names = F, sep='\t')
 
 
