@@ -1,0 +1,53 @@
+--------------------------------- ARCHIVE --------------------------------------------- 
+
+#useful scripts are in cbioportal/core/src/main/scripts
+https://github.com/chaelir/datahub.git
+https://github.com/chaelir/cbioportal.git
+### Handling dependency
+Brew install git-lfs
+Brew install mysql@5.7 #very version picky, has to use mysql57
+Brew install maven
+Brew install tomcat@8
+pip install mysql-python
+mysql_upgrade -u root -p password --force
+Brew services start tomcat@8
+Brew services start mysql@5.7
+### Handling mysql
+mysql --user root --password=password -ve "DROP DATABASE IF EXISTS cbioportal; CREATE DATABASE cbioportal"
+mysql --user root --password=password -ve "DROP USER IF EXISTS 'cbio_user'@'localhost'; CREATE USER 'cbio_user'@'localhost' IDENTIFIED BY 'somepassword'"
+mysql --user root --password=password -ve "GRANT ALL ON cbioportal.* TO 'cbio_user'@'localhost'"
+mysql --user root --password=password -ve "flush privileges"
+mysql --user=cbio_user --password=somepassword cbioportal < db-scripts/src/main/resources/cgds.sql
+#It may be necessary to change time_zone that fi tomcat reports 404 error
+mysql --verbose --help | grep my.cnf
+# set default-time-zone that works for tomcat
+default-time-zone='+00:00'
+### Handling tomcat
+export CATALINA_HOME="/usr/local/opt/tomcat\@8/libexec"
+export CATALINA_OPTS='-Dauthenticate=false' #guess this overrides property file
+brew services restart tomcat\@8 #MUST use brew services to start/stop
+wget https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war -O $CATALINA_HOME/webapps/sample.war # a small test
+ls $CATALINA_HOME/logs #all the logs went here
+pushd $CATALINA_HOME/lib
+wget https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.15.tar.gz
+tar -zxvf mysql-connector-java-8.0.15.tar.gz --strip-components=1 mysql-connector-java-8.0.15/mysql-connector-java-8.0.15.jar
+popd
+lsof -i:8080 -i:8005 #find competing tomcat instances
+echo 'export CATALINA_OPTS="$CATALINA_OPTS -XX:MaxPermSize=256m"' >$CATALINA_HOME/setenv.sh
+#add stuff to $CATALINA_HOME/conf/context.xml
+#see https://cbioportal.readthedocs.io/en/latest/Deploying.html
+### Handling cbioportal
+export PORTAL_HOME=$HOME/setup/cbioportal-docker/cbioportal
+pushd $PORTAL_HOME
+cp src/main/resources/portal.properties $PORTAL_HOME
+mvn -DskipTests clean install
+sudo cp $PORTAL_HOME/portal/target/cbioportal-*.war $CATALINA_HOME/webapps/cbioportal.war
+
+#Following steps in:
+https://cbioportal.readthedocs.io/en/latest/Pre-Build-Steps.html
+#Check database service alive at http://localhost:8080/cbioportal 
+
+validateData.py -s crc_tcga -u http://localhost:8080/cbioportal -v
+metaImport.py -s crc_tcga -u http://localhost:8080/cbioportal -html myReport.html -v -o #import a study
+#After import need to restart tomcat and mysql to view datasets
+cbioportalImporter.py -c remove-study -meta devel/meta_study.txt.bak #remove a study

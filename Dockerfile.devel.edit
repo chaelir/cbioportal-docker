@@ -10,8 +10,7 @@ MAINTAINER Fedde Schaeffer <fedde@thehyve.nl>
 # install build and runtime dependencies and configure Tomcat for production
 RUN apt-get update --fix-missing
 RUN apt-get install -y --no-install-recommends --fix-missing \
-    vim
-RUN apt-get install -y --no-install-recommends --fix-missing \
+    vim \
 		git \
 		libmysql-java \
 		maven \
@@ -23,7 +22,9 @@ RUN apt-get install -y --no-install-recommends --fix-missing \
 		python3-requests \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& ln -s /usr/share/java/mysql-connector-java.jar "$CATALINA_HOME"/lib/ \
-	&& rm -rf $CATALINA_HOME/webapps/*m* 
+	&& rm -rf $CATALINA_HOME/webapps/*m* \
+  && git config --global user.email "xia@stanford.gmail" \
+  && git config --global user.name "CX"
 	
 
 # fetch the cBioPortal sources and version control metadata

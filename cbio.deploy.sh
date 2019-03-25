@@ -157,7 +157,7 @@ fi
 #    -e MYSQL_PASSWORD=${db_password} \
 
 ### prep immube database ###
-if [ $stage == 'prep_IM' ]; then
+if [ $stage == 'prep_mysql_im' ]; then
   if [[ -z ${immube_init_sql} ]]; then
     echo "immube database file not found: ${immube_init_sql}" 
     exit
@@ -183,6 +183,24 @@ if [ $stage == 'build_cbio' ]; then
 	#docker build --no-cache -t ${docker_cbio_image} -f ${docker_cbio_dockerfile} ${docker_cbio_source}
   #you will need --no-cache if you haven't build a thing for a while to avoid apt source not found errors...
   exit
+fi
+
+### rerun cbio portal service with changes saved to image ###
+if [ $stage == 'rerun_cbio' ]; then
+  docker stop ${docker_cbio_instance}
+  docker commit ${docker_cbio_instance} ${docker_cbio_image}
+  docker rm -f ${docker_cbio_instance}
+  docker run -d --restart=${docker_restart} \
+    --name=${docker_cbio_instance} \
+    --net=${docker_network} \
+    -e TZ="${docker_timezone}" \
+    -e CATALINA_OPTS='${docker_cbio_opt}' \
+    -v ${db_datahub_path}/:/mnt/datahub/ \
+    -v ${db_datahub_priv_path}/:/mnt/datahub_priv/ \
+    -p ${docker_cbio_port}:8080 \
+		${docker_cbio_image}
+  # property file must be hard copied to container
+  docker cp ${portal_configure_file} ${docker_cbio_instance}:/cbioportal/portal.properties
 fi
 
 ### run cbio portal service ###
