@@ -71,8 +71,9 @@ db_dataseed_sql="seed-cbioportal_hg19_v2.7.2.sql.gz"
 db_runtime_path="${build_parent}/cbioportal-docker-runtime"
 db_datahub_path="${build_parent}/datahub"
 db_datahub_priv_path="${build_parent}/datahub_priv"
-db_public_studies=('custom/crc_tcga')
-db_private_studies=()
+db_public_studies=('public/coadread_tcga')
+#db_private_studies=('custom/crc_tcga')
+db_private_studies=('')
 
 ### read additional variables from teh property file
 
