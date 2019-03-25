@@ -71,7 +71,7 @@ db_dataseed_sql="seed-cbioportal_hg19_v2.7.2.sql.gz"
 db_runtime_path="${build_parent}/cbioportal-docker-runtime"
 db_datahub_path="${build_parent}/datahub"
 db_datahub_priv_path="${build_parent}/datahub_priv"
-db_public_studies=('coadread_tcga')
+db_public_studies=('custom/crc_tcga')
 db_private_studies=()
 
 ### read additional variables from teh property file
@@ -215,7 +215,7 @@ if [ $stage == 'load_cbio' ]; then
   for study in ${db_public_studies[@]}; do
     docker exec -it ${docker_cbio_instance} bash -c \
       "metaImport.py -u http://localhost:8080/cbioportal \
-      -s /mnt/datahub/public/${study} -o"
+      -s /mnt/datahub/${study} -o"
   done
   for study in ${db_private_studies[@]}; do
     docker exec -it ${docker_cbio_instance} bash -c \

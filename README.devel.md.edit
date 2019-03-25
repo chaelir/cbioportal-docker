@@ -30,11 +30,59 @@ diff portal.properties portal.properties.v1.17h >portal.properties.devel.patch
 ```
 Create git branches devel for both cbioportal and cbioportal-docker to store your changes.
 
-3. Do your modification and incrementally build and test.
-Use clean to trash intermediatary files.
-Keep the cbioportal/db-scripts/src/main/resources/cgds_im.sql synced with db_IM/cgds_im.sql.
+3. Debug your modification with a local portal 
+(see notes/2018Sep23.cbio.local.rst)
+local portal configuration in cbioportal/src/main/resources/portal.properties
 ```
-cp db_IM/cgds_im.sql cbioportal/db-scripts/src/main/resources/cgds_im.sql
+### Handling dependency
+Brew install git-lfs
+Brew install mysql@5.7 #very version picky, has to use mysql57
+Brew install maven
+Brew install tomcat@8
+pip install mysql-python
+mysql_upgrade -u root -p password --force
+Brew services start tomcat@8
+Brew services start mysql@5.7
+### Handling mysql
+mysql --user root --password=password -ve "DROP DATABASE IF EXISTS cbioportal; CREATE DATABASE cbioportal"
+mysql --user root --password=password -ve "DROP USER IF EXISTS 'cbio_user'@'localhost'; CREATE USER 'cbio_user'@'localhost' IDENTIFIED BY 'somepassword'"
+mysql --user root --password=password -ve "GRANT ALL ON cbioportal.* TO 'cbio_user'@'localhost'"
+mysql --user root --password=password -ve "flush privileges"
+mysql --user=cbio_user --password=somepassword cbioportal < db-scripts/src/main/resources/cgds.sql
+#It may be necessary to change time_zone that fi tomcat reports 404 error
+mysql --verbose --help | grep my.cnf
+# set default-time-zone that works for tomcat
+echo "default-time-zone='+00:00'" >>my.cnf # my.cnf depends 
+### Handling tomcat
+export CATALINA_HOME="/usr/local/opt/tomcat\@8/libexec"
+export CATALINA_OPTS='-Dauthenticate=false' #guess this overrides property file
+brew services restart tomcat\@8 #MUST use brew services to start/stop
+wget https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war -O $CATALINA_HOME/webapps/sample.war # a small test
+ls $CATALINA_HOME/logs #all the logs went here
+pushd $CATALINA_HOME/lib
+wget https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.15.tar.gz
+tar -zxvf mysql-connector-java-8.0.15.tar.gz --strip-components=1 mysql-connector-java-8.0.15/mysql-connector-java-8.0.15.jar
+popd
+lsof -i:8080 -i:8005 #find competing tomcat instances
+echo 'export CATALINA_OPTS="$CATALINA_OPTS -XX:MaxPermSize=256m"' >$CATALINA_HOME/setenv.sh
+#add stuff to $CATALINA_HOME/conf/context.xml
+#see https://cbioportal.readthedocs.io/en/latest/Deploying.html
+### Handling cbioportal
+export PORTAL_HOME=$HOME/setup/cbioportal-docker/cbioportal
+pushd $PORTAL_HOME 
+cp src/main/resources/portal.properties $PORTAL_HOME
+mvn -DskipTests clean install
+sudo cp $PORTAL_HOME/portal/target/cbioportal-*.war $CATALINA_HOME/webapps/cbioportal.war
+```
+
+4. Do your modification and incrementally build and test with local tomcat.
+Use clean to trash intermediatary files.
+Keep the cbioportal/db-scripts/src/main/resources/* synced with db_IM/*.
+Keep the ../datahub/custom/crc_tcga/* synced with example/*.
+```
+pushd db_IM
+./cgds_im.init.sh
+popd db_IM
 ./cbio.devel.sh prep_db
 ./cbio.devel.sh clean core
 ./cbio.devel.sh integration-test core
