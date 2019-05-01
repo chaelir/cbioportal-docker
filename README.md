@@ -3,48 +3,61 @@
 ## Instructions ##
 
 ### For users ###
-Identify a branch you would like to use, e.g. v1.17h.
+Identify a cbioportal branch you would like to use, e.g. release-3.0.0 .
 Deploy the instances based on this choice.
 ```
-./cbio.deploy.sh build_cbio v1.17h
-./cbio.deploy.sh run_mysql v1.17h
-./cbio.deploy.sh prep_mysql v1.17h 
-./cbio.deploy.sh run_cbio v1.17h
-./cbio.deploy.sh load_cbio v1.17h
+./cbio.deploy.sh run_mysql release-3.0.0
+./cbio.deploy.sh prep_mysql release-3.0.0 
+./cbio.deploy.sh build_cbio release-3.0.0
+./cbio.deploy.sh run_cbio release-3.0.0
+./cbio.deploy.sh populate_cbio release-3.0.0
 
 ```
 Now check your browser at http://localhost:8882/cbioportal/
 
 ### For developers ###
-1. Start with the code of a working branch at both cbioportal-docker and cbioportal, say v1.17h.
+1. Start with the code of a working branch at cbioportal, say release-3.0.0.
 Process exactly the same as above.
 
-2. Create a tag name you would like your code be in deploy, e.g. devel
-Creat a new set of editable tag-specific Dockerfile and portal.properties files.
-Create patches that would regenerate the tag-specific Dockerfile and portal.properties files.
-```
-cp Dockerfile.v1.17h.edit Dockerfile.devel.edit 
-cp portal.properties.v1.17h.edit portal.properties.devel.edit
-diff Dockerfile Dockerfile.devel.edit >Dockerfile.devel.patch
-diff portal.properties portal.properties.v1.17h >portal.properties.devel.patch
-```
-Create git branches devel for both cbioportal and cbioportal-docker to store your changes.
+2. Create a branch name you would like your code be in deploy, e.g. devel
+Commit changes you made to the code to the devel branch, which will run cbioportal:release-3.0.0
 
-3. Debug your modification with a local portal with tomcat
-(see notes/2018Sep23.cbio.local.rst)
-local portal configuration in src/main/resources/portal.properties
-local log configuration in src/main/resources/log4j.properties
+3. Debug your changes using local dockerized portal and db
+configure local portal configuration in portal.properties
+configure local log configuration in log4j.properties
+These files will be used at the 'build_cbio' stage to build the portal docker image
+
 ```
-### Handling dependency
-Brew install git-lfs
+pushd db_IM
+./cgds_im.init.sh
+popd db_IM
+./cbio.devel.sh prep_db
+./cbio.devel.sh clean core
+./cbio.devel.sh integration-test core
+./cbio.devel.sh integration-test core -Dtest=TestDaoCellProfile
+./cbio.deploy.sh build_cbio devel
+./cbio.deploy.sh run_mysql devel
+./cbio.deploy.sh prep_mysql devel
+./cbio.deploy.sh run_cbio devel
+./cbio.deploy.sh load_cbio devel
+```
+
+When you are done, push your changes to the remote 
+
+
+### Obsolete instructions (donot follow) ###
+(see notes/2018Sep23.cbio.local.rst)
+```
+### Handling dependencies in Mac OSX
+brew install git-lfs
 brew install mysql@5.7 #very version picky, has to use mysql57
 brew install maven
 brew install tomcat@8
 brew install mysql-java
 pip install mysql-python
 mysql_upgrade -u root -p password --force
-Brew services start tomcat@8
-Brew services start mysql@5.7
+brew services start tomcat@8
+brew services start mysql@5.7
 ### Handling mysql
 # It is important to always grant access to cgds_test.* and cbioportal.* that both test and tomcat will work
 mysql --user root --password=password -ve "CREATE DATABASE cbioportal"
@@ -87,28 +100,12 @@ sudo cp $PORTAL_HOME/portal/target/cbioportal-*.war $CATALINA_HOME/webapps/cbiop
 brew services restart mysql@5.7 #MUST use brew services to start/stop
 brew services restart comcat@8
 ```
-
-4. Do your modification and incrementally build and test with local tomcat.
+Do your modification and incrementally build and test with local tomcat.
 Use clean to trash intermediatary files.
 Keep the cbioportal/db-scripts/src/main/resources/* synced with db_IM/*.
 Keep the ../datahub/custom/crc_tcga/* synced with example/*.
-```
-pushd db_IM
-./cgds_im.init.sh
-popd db_IM
-./cbio.devel.sh prep_db
-./cbio.devel.sh clean core
-./cbio.devel.sh integration-test core
-./cbio.devel.sh integration-test core -Dtest=TestDaoCellProfile
-./cbio.deploy.sh build_cbio devel
-./cbio.deploy.sh run_mysql devel
-./cbio.deploy.sh prep_mysql devel
-./cbio.deploy.sh run_cbio devel
-./cbio.deploy.sh load_cbio devel
-```
-When you are done, push your changes to the remote 
 
-# Originally by The Hyve #
+### Original README.md by The Hyve ###
 # cbioportal-docker @ The Hyve #
 
 The [cBioPortal](https://github.com/cBioPortal/cbioportal) project
