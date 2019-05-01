@@ -224,7 +224,7 @@ fi
 # docker exec -it cbioPortal1 /bin/bash ""
 # docker logs cbioPortal1
 
-### rerun cbio portal service with changes saved to image ###
+###SECTION: rerun cbio portal service with manual changes and property file changes saved
 if [ $stage == 'rerun_cbio' ]; then
   # change container context by hard copying property files to container and rerun
   cmd="docker cp ${portal_configure_file} ${docker_cbio_instance}:/cbioportal/portal.properties \
@@ -245,26 +245,25 @@ if [ $stage == 'rerun_cbio' ]; then
   echo "#docker logs ${docker_cbio_instance}"
 fi
 
-### migrate seedDB ###
+###SECTION: migrate seedDB ###
 if [ $stage == 'migrate_cbio' ]; then
-  docker exec -it ${docker_cbio_instance} bash -c \
-    "migrate_db.py --properties-file /cbioportal/portal.properties \
-    --sql /cbioportal/db-scripts/src/main/resources/migration.sql"
+  cmd="docker exec -it ${docker_cbio_instance} bash -c \
+    'migrate_db.py --properties-file /cbioportal/portal.properties \
+    --sql /cbioportal/db-scripts/src/main/resources/migration.sql'"
+  echo $cmd
 fi
 
-### load cbio database ###
-if [ $stage == 'load_cbio' ]; then
+###SECTION: load cbio database ###
+if [ $stage == 'populate_cbio' ]; then
+  cmd="echo add_study_data"
   for study in ${db_public_studies[@]}; do
-    docker exec -it ${docker_cbio_instance} bash -c \
-      "metaImport.py -u http://localhost:8080/cbioportal \
-      -s /mnt/datahub/${study} -o"
+    cmd="$cmd && docker exec -it ${docker_cbio_instance} bash -c \
+      'metaImport.py -u http://localhost:8080/cbioportal \
+      -s /mnt/datahub/${study} -o'"
   done
   for study in ${db_private_studies[@]}; do
-    docker exec -it ${docker_cbio_instance} bash -c \
-      "metaImport.py -u http://localhost:8080/cbioportal \
-      -s /mnt/datahub_priv/${study} -o"
+    cmd="$cmd && docker exec -it ${docker_cbio_instance} bash -c \
+      'metaImport.py -u http://localhost:8080/cbioportal \
+      -s /mnt/datahub_priv/${study} -o'"
   done
 fi
-
-### get an interactive mysql
-# docker exec -it cbioDB1 sh -c "mysql -ucbio1 -pP@ssword1 cbioportal1" 
