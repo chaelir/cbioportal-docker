@@ -63,13 +63,10 @@ docker_db_wait=10
 #seedDB
 db_root_password="P@ssword1"
 #how to choose seedDB? see: https://github.com/cBioPortal/datahub/tree/master/seedDB
-#  cgds.sql version of seedDB and cbioportal version must match
-#  sometimes this means to merge the newest cBioPortal/seedDB to chaelir/seedDB 
+#  make sure the seed version is consistent with portal version before seed_mysql
 db_dataseed_path="${build_parent}/datahub/seedDB"
 db_dataseed_sql="${db_dataseed_path}/seed-cbioportal_hg19_v2.8.2.sql.gz" 
-#cgds_init_sql="${build_root}/cbioportal/db-scripts/src/main/resources/cgds.sql"
-#this is a better place to look for proper cgds.sql
-cgds_init_sql="${db_dataseed_path}/cgds.sql"
+cgds_init_sql="${db_dataseed_path}/cgds_v2.8.2.sql"
 # local folders for mysql files
 db_runtime_path="${build_parent}/cbioportal-docker-runtime"
 # local folders for public and private data files
@@ -77,9 +74,10 @@ db_datahub_path="${build_parent}/datahub"
 db_datahub_priv_path="${build_parent}/datahub_priv"
 db_public_studies=('')
 db_private_studies=('')
-#db_public_studies=('public/coadread_tcga')
-#db_private_studies=('custom/crc_tcga')
+db_public_studies=('public/coadread_tcga')
 #db_private_studies=('imh/crc_imh')
+#use git lfs fetch to fetch all lfs files
+#use git lfs checkout to checkout fetched file
 
 ###SECTION: read additional variables from teh property file
 echo "#loading ${portal_configure_file}"
@@ -266,4 +264,5 @@ if [ $stage == 'populate_cbio' ]; then
       'metaImport.py -u http://localhost:8080/cbioportal \
       -s /mnt/datahub_priv/${study} -o'"
   done
+  echo $cmd
 fi
