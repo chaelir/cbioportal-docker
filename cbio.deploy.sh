@@ -4,14 +4,15 @@
 # portal.properties and Dockerfile
 # for Bash compatibility, use "${var}" instead of '$var' or '${var}'
 
+#SECTION: input parameters
 if [ -z $2 ]; then 
   echo "###input a stage and a cbio branch name:"
-  echo "#  available stages: \${stage}=dry | get_network | run_mysql | prep_mysql | build_cbio and more, see below"
+  echo "#  available stages: \${stage}=dry | get_network | run_mysql | seed_mysql | build_cbio and more, see below"
   echo "#  available branches: \${branch}=release-3.0.0"
   echo "###Here we describe each stage and its output:"
   echo "#  [run_mysql]: cbio.deploy.sh run_mysql \${branch} -> mysql:5.7 running"
-  echo "#  [prep_mysql]: cbio.deploy.sh prep_mysql \${branch} -> mysql:5.7 running with seedDB"
-  echo "#  [prep_mysql_im]: cbio.deploy.sh prep_mysql_im \${branch} -> mysql:5.7 running with seedDB and mimmubeDB"
+  echo "#  [seed_mysql]: cbio.deploy.sh seed_mysql \${branch} -> mysql:5.7 running with seedDB"
+  echo "#  [seed_mysql_im]: cbio.deploy.sh seed_mysql_im \${branch} -> mysql:5.7 running with seedDB and mimmubeDB"
   echo "#  [build_cbio]: cbio.deploy.sh build_cbio \${branch} -> cbioportal:\${branch} built"
   echo "#  [run_cbio]: cbio.deploy.sh run_cbio \${branch} -> cbioportal:\${branch} running"
   echo "#  [rebuild_cbio]: "
@@ -24,24 +25,21 @@ if [ -z $2 ]; then
   echo "#  cBioPortal/datahub -> chaelir/datahub "
   exit
 fi
-
 #set -x
 stage=$1
 branch=$2
 
-### pathes must use absolute path here to be mounted by docker
+###SECTION: pathes must use absolute path here to be mounted by docker
 build_root=$(pwd)
 build_parent=$(cd .. && pwd)
-portal_configure_file="${build_root}/portal.properties"
 
-### define the sql files to be mapped by this script ###
+###SECTION: define the mimmube sql files to be mapped by this script
 #NOTE: all IM db scripts are now merged into cgds_im.sql
 #NOtE: these sql files must be synced between the cbio and the mysql db
 immube_init_sql="${build_root}/db_IM/cgds_im.sql"
-cgds_init_sql="${build_root}/cbioportal/db-scripts/src/main/resources/cgds.sql"
 mysql_clean_sql="${build_root}/db_IM/cgds_clean.sql"
 
-### configurable none portal.properties variables ###
+###SECTION: configurable none portal.properties variables ###
 #NOTE: all these will go some properties file, say immube.properties later
 docker_timezone="America/Los_Angeles"
 docker_restart="always"
@@ -52,23 +50,29 @@ docker_network="cbio-net1"
 git_cbio_local="cbioportal"
 git_cbio_branch=${branch}
 git_cbio_remote="https://github.com/chaelir/cbioportal.git"
+portal_configure_file="portal.properties"
 docker_cbio_dockerfile="Dockerfile"
-docker_cbio_image="cbioportal-${git_cbio_branch}"
+docker_cbio_image="cbioportal:${git_cbio_branch}"
 docker_cbio_instance="cbioPortal1"
 docker_cbio_port=8882
 docker_mysql_port=3337
-docker_cbio_opt="'-Xms2g -Xmx4g'" #tricky quote issue, important to preserve quote this way
+#docker_cbio_opt="'-Xms2g -Xmx4g'" #tricky quote issue for direct execution, important to preserve quote this way
+docker_cbio_opt="-Xms2g -Xmx4g"
 docker_db_wait=10
-### seedDB
+
+#seedDB
 db_root_password="P@ssword1"
 #how to choose seedDB? see: https://github.com/cBioPortal/datahub/tree/master/seedDB
 #  cgds.sql version of seedDB and cbioportal version must match
 #  sometimes this means to merge the newest cBioPortal/seedDB to chaelir/seedDB 
 db_dataseed_path="${build_parent}/datahub/seedDB"
-db_dataseed_sql="seed-cbioportal_hg19_v2.8.2.sql.gz" 
-### local folders for mysql files
+db_dataseed_sql="${db_dataseed_path}/seed-cbioportal_hg19_v2.8.2.sql.gz" 
+#cgds_init_sql="${build_root}/cbioportal/db-scripts/src/main/resources/cgds.sql"
+#this is a better place to look for proper cgds.sql
+cgds_init_sql="${db_dataseed_path}/cgds.sql"
+# local folders for mysql files
 db_runtime_path="${build_parent}/cbioportal-docker-runtime"
-### local folders for public and private data files
+# local folders for public and private data files
 db_datahub_path="${build_parent}/datahub"
 db_datahub_priv_path="${build_parent}/datahub_priv"
 db_public_studies=('')
@@ -77,8 +81,7 @@ db_private_studies=('')
 #db_private_studies=('custom/crc_tcga')
 #db_private_studies=('imh/crc_imh')
 
-### read additional variables from teh property file
-### dry mode: show parameters only ###
+###SECTION: read additional variables from teh property file
 echo "#loading ${portal_configure_file}"
 if [ -f "${portal_configure_file}" ]; then
   #echo "ignore these errors arising from: ${portal_configure_file}"
@@ -94,6 +97,8 @@ if [ -f "${portal_configure_file}" ]; then
   done < "${portal_configure_file}" 2>/dev/null
   #set -x
 fi
+
+###SECTION: dry mode: show parameters only ###
 if [ $stage == "dry" ]; then
   #echo "check important variables loaded from ${portal_configure_file}"
   echo "#in portal.properties file:"
@@ -109,7 +114,7 @@ if [ $stage == "dry" ]; then
   echo "  docker_mysql_port=${docker_mysql_port}"
 fi
 
-### create docker network ###
+###SECTION: create docker network ###
 # create a network if not existing, other do not panic
 if [ $stage == "get_network" ]; then
   cmd="docker network create ${docker_network}"
@@ -117,7 +122,7 @@ if [ $stage == "get_network" ]; then
   #docker network create ${docker_network} || true
 fi
 
-### run mysql docker ###
+###SECTION: run mysql docker ###
 if [ $stage == 'run_mysql' ]; then
   cmd="(mkdir ${db_runtime_path}/${db_host} || true) \
     && (docker pull mysql:5.7 || true) \
@@ -143,8 +148,8 @@ if [ $stage == 'run_mysql' ]; then
   echo "#docker logs ${db_host}"
 fi
 
-### prep standard cbio db ###
-if [ $stage == 'prep_mysql' ]; then
+###SECTION: seed standard cbio db ###
+if [ $stage == 'seed_mysql' ]; then
   #sleep ${docker_db_wait} ## wait the db to initialize
   cmd="docker run \
     --net=${docker_network} \
@@ -155,7 +160,7 @@ if [ $stage == 'prep_mysql' ]; then
   && docker run \
     --net=${docker_network} \
     -e TZ="${docker_timezone}" \
-    -v ${db_dataseed_path}/${db_dataseed_sql}:/mnt/seed.sql.gz:ro \
+    -v ${db_dataseed_sql}:/mnt/seed.sql.gz:ro \
     mysql:5.7 \
     sh -c \"zcat /mnt/seed.sql.gz |  mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}\" "
   echo $cmd
@@ -163,8 +168,8 @@ if [ $stage == 'prep_mysql' ]; then
   echo "#docker logs ${db_host}"
 fi
 
-### prep immube db ###
-if [ $stage == 'prep_mysql_im' ]; then
+###SECTION: seed immube db ###
+if [ $stage == 'seed_mysql_im' ]; then
   if [[ -z ${immube_init_sql} ]]; then
     echo "immube database file not found: ${immube_init_sql}" 
     exit
@@ -180,58 +185,64 @@ if [ $stage == 'prep_mysql_im' ]; then
   echo "docker logs ${db_host}"
 fi
 
-### build cbioportal docker image
+###SECTION: build cbioportal docker image
 if [ $stage == 'build_cbio' ]; then
+  cmd="echo had_cloned_cbio"
   if [[ ! -d ${git_cbio_local} ]]; then 
-    git clone ${git_cbio_remote} #if no local source, clone it entirely
+    cmd="git clone ${git_cbio_remote}" #if no local source, clone it entirely
   fi
-  pushd ${git_cbio_local} 
-  git pull origin ${git_cbio_branch} #if existing, checkout the branch (keep it the same tag)
-  git checkout ${git_cbio_branch}  #update the branch
   #NOTE: you will need --no-cache if you haven't build a thing for a while to avoid apt source not found errors...
-	docker build -t ${docker_cbio_image} -f ${docker_cbio_dockerfile} .
-  popd
-  docker images #you should see  cbioportal:${git_cbio_branch}
-  exit
+  #NOTE: overwrites the portal.properties file as intended
+  cmd="$cmd \
+    && pushd ${git_cbio_local} \
+  	&& git pull origin ${git_cbio_branch} \
+  	&& git checkout ${git_cbio_branch} \
+    && cp ../${portal_configure_file} . \
+  	&& popd \
+		&& docker build -t ${docker_cbio_image} -f ${docker_cbio_dockerfile} ."
+  echo $cmd
+  echo "#docker images" #you should see cbioportal:${git_cbio_branch} is available
 fi
 
-### run cbio portal service ###
+###SECTION: run cbio portal service ###
 if [ $stage == 'run_cbio' ]; then
-  docker rm -f ${docker_cbio_instance} || true
-  docker run -d --restart=${docker_restart} \
-    --name=${docker_cbio_instance} \
-    --net=${docker_network} \
-    -e TZ="${docker_timezone}" \
-    -e CATALINA_OPTS='${docker_cbio_opt}' \
-    -v ${db_datahub_path}/:/mnt/datahub/ \
-    -v ${db_datahub_priv_path}/:/mnt/datahub_priv/ \
-    -p ${docker_cbio_port}:8080 \
-		${docker_cbio_image}
-  # property file must be hard copied to container
-  docker cp ${portal_configure_file} ${docker_cbio_instance}:/cbioportal/portal.properties
-  echo "Take a note: access the running cbio instance with the following command:"
-  echo "docker exec -it ${docker_cbio_instance} /bin/bash \"\" "
-  echo "docker logs ${docker_cbio_instance}"
+  # property file must be hard copied to an instance, why?
+  cmd="(docker rm -f ${docker_cbio_instance} || true) \
+  	&& docker run -d --restart=${docker_restart} \
+    	--name=${docker_cbio_instance} \
+    	--net=${docker_network} \
+    	-e TZ="${docker_timezone}" \
+    	-e CATALINA_OPTS='${docker_cbio_opt}' \
+    	-v ${db_datahub_path}/:/mnt/datahub/ \
+    	-v ${db_datahub_priv_path}/:/mnt/datahub_priv/ \
+    	-p ${docker_cbio_port}:8080 \
+			${docker_cbio_image}"
+  echo $cmd
+  echo "#docker exec -it ${docker_cbio_instance} /bin/bash -c \"echo command\" "
+  echo "#docker logs ${docker_cbio_instance}"
 fi
 # docker exec -it cbioPortal1 /bin/bash ""
 # docker logs cbioPortal1
 
 ### rerun cbio portal service with changes saved to image ###
 if [ $stage == 'rerun_cbio' ]; then
-  docker stop ${docker_cbio_instance}
-  docker commit ${docker_cbio_instance} ${docker_cbio_image}
-  docker rm -f ${docker_cbio_instance}
-  docker run -d --restart=${docker_restart} \
-    --name=${docker_cbio_instance} \
-    --net=${docker_network} \
-    -e TZ="${docker_timezone}" \
-    -e CATALINA_OPTS='${docker_cbio_opt}' \
-    -v ${db_datahub_path}/:/mnt/datahub/ \
-    -v ${db_datahub_priv_path}/:/mnt/datahub_priv/ \
-    -p ${docker_cbio_port}:8080 \
-		${docker_cbio_image}
-  # property file must be hard copied to container
-  # docker cp ${portal_configure_file} ${docker_cbio_instance}:/cbioportal/portal.properties
+  # change container context by hard copying property files to container and rerun
+  cmd="docker cp ${portal_configure_file} ${docker_cbio_instance}:/cbioportal/portal.properties \
+    && docker stop ${docker_cbio_instance} \
+  	&& docker commit ${docker_cbio_instance} ${docker_cbio_image} \
+  	&& docker rm -f ${docker_cbio_instance} \
+  	&& docker run -d --restart=${docker_restart} \
+    	 --name=${docker_cbio_instance} \
+    	 --net=${docker_network} \
+    	 -e TZ="${docker_timezone}" \
+    	 -e CATALINA_OPTS='${docker_cbio_opt}' \
+    	 -v ${db_datahub_path}/:/mnt/datahub/ \
+    	 -v ${db_datahub_priv_path}/:/mnt/datahub_priv/ \
+    	 -p ${docker_cbio_port}:8080 \
+			 ${docker_cbio_image}"
+  echo $cmd
+  echo "#docker exec -it ${docker_cbio_instance} /bin/bash -c \"echo command\" "
+  echo "#docker logs ${docker_cbio_instance}"
 fi
 
 ### migrate seedDB ###

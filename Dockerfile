@@ -19,6 +19,7 @@ RUN apt-get install -y --no-install-recommends --fix-missing \
 		python3-jinja2 \
 		python3-mysqldb \
 		python3-requests \
+		python3-yaml \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& ln -s /usr/share/java/mysql-connector-java.jar "$CATALINA_HOME"/lib/ \
 	&& rm -rf $CATALINA_HOME/webapps/*m* 
@@ -28,6 +29,7 @@ RUN apt-get install -y --no-install-recommends --fix-missing \
 ENV PORTAL_HOME=/cbioportal
 #RUN git clone --depth 1 -b v1.17.1+backport4787-4917-5057 'https://github.com/thehyve/cbioportal.git' $PORTAL_HOME
 #The source code folder cbioportal is assumed present already
+#cp the source code folder to $PORTAL_HOME
 ADD cbioportal $PORTAL_HOME
 WORKDIR $PORTAL_HOME
 
@@ -39,8 +41,8 @@ COPY ./log4j.properties src/main/resources/log4j.properties
 
 # build and install, placing the scripts jar back in the target folder
 # where import scripts expect it after cleanup
-RUN mvn -DskipTests clean package \
-	&& unzip portal/target/cbioportal-*.war -d $CATALINA_HOME/webapps/cbioportal \
+RUN mvn -DskipTests clean install \
+	&& unzip portal/target/cbioportal.war -d $CATALINA_HOME/webapps/cbioportal \
 	&& mv scripts/target/scripts-*.jar /root/ \
 	&& mvn clean \
 	&& mkdir scripts/target/ \
@@ -48,7 +50,8 @@ RUN mvn -DskipTests clean package \
 
 # add runtime plumbing to Tomcat config:
 # - make cBioPortal honour db config in portal.properties
-RUN echo 'CATALINA_OPTS="-Dauthenticate=false $CATALINA_OPTS -Ddbconnector=dbcp"' >>$CATALINA_HOME/bin/setenv.sh
+# temporarily add session.service.url here since it does not work in portal.properties
+RUN echo 'CATALINA_OPTS="-Dauthenticate=false -Dsession.service.url=http://cbio-session-service:8080/api/sessions/main_session/ $CATALINA_OPTS -Ddbconnector=dbcp"' >>$CATALINA_HOME/bin/setenv.sh
 # - tweak server-wide config file
 COPY ./catalina_server.xml.patch /root/
 RUN patch $CATALINA_HOME/conf/server.xml </root/catalina_server.xml.patch

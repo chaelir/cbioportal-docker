@@ -111,7 +111,15 @@ When you are done, push your changes to the remote
 # Originally by The Hyve #
 # cbioportal-docker @ The Hyve #
 
-The [cBioPortal](https://github.com/cBioPortal/cbioportal) project documents a setup to deploy a cBioPortal server using Docker, in [this section of the documentation](https://cbioportal.readthedocs.io/en/latest/#docker). As cBioPortal traditionally does not distinguish between build-time and deploy-time configuration, the setup documented there builds the application at runtime, and suggests running auxiliary commands in the same container as the webserver. The above approach may sacrifice a few advantages of using Docker by going against some of its idioms. For this reason, the project you are currently looking at documents an alternative setup, which builds a ready-to-run cBioPortal application into a Docker image.
+The [cBioPortal](https://github.com/cBioPortal/cbioportal) project
+documents a setup to deploy a cBioPortal server using Docker,
+in [this section of the documentation](https://docs.cbioportal.org/#2-4-docker).
+As cBioPortal traditionally did not distinguish between build-time and deploy-time configuration,
+the setup documented there builds the application at runtime,
+and suggests running auxiliary commands in the same container as the webserver.
+The above approach may sacrifice a few advantages of using Docker by going against some of its idioms.
+For this reason, the project you are currently looking at documents an alternative setup,
+which builds a ready-to-run cBioPortal application into a Docker image.
 
 To get started, download and install Docker from www.docker.com.
 
@@ -128,8 +136,7 @@ docker network create cbio-net
 
 ### Step 2 - Run mysql with seed database ###
 Start a MySQL server. The command below stores the database in a folder named
-`/<path_to_save_mysql_db>/db_files/`. This should be an absolute path, that
-does *not* point to a directory already containing database files.
+`/<path_to_save_mysql_db>/db_files/`. This should be an absolute path.
 
 ```
 docker run -d --restart=always \
@@ -196,7 +203,24 @@ docker run --rm -it --net cbio-net \
     migrate_db.py -p /cbioportal/portal.properties -s /cbioportal/db-scripts/src/main/resources/migration.sql
 ```
 
-### Step 5 - Run the cBioPortal web server ###
+### Step 5 - Run Session Service containers
+First, create the mongoDB database:
+
+```
+docker run -d --name=mongoDB --net=cbio-net \
+    -e MONGO_INITDB_DATABASE=session_service \
+    mongo:4.0
+```
+
+Finally, create a container for the Session Service, adding the link to the mongoDB database using `-Dspring.data.mongodb.uri`:
+
+```
+docker run -d --name=cbio-session-service --net=cbio-net \
+    -e JAVA_OPTS="-Dspring.data.mongodb.uri=mongodb://mongoDB:27017/session-service" \
+    thehyve/cbioportal-session-service:cbiov2.1.0
+```
+
+### Step 6 - Run the cBioPortal web server ###
 
 Add any cBioPortal configuration in `portal.properties` as appropriate—see
 the documentation on the
