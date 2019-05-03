@@ -1,12 +1,129 @@
+# cbioportal-docker @ Chaelir #
+
+## Instructions ##
+
+### For users ###
+Identify a cbioportal branch you would like to use, e.g. release-3.0.0 .
+Deploy the instances based on this choice.
+```
+./cbio.deploy.sh run_mysql release-3.0.0
+./cbio.deploy.sh prep_mysql release-3.0.0 
+./cbio.deploy.sh build_cbio release-3.0.0
+./cbio.deploy.sh run_cbio release-3.0.0
+./cbio.deploy.sh populate_cbio release-3.0.0
+
+```
+Now check your browser at http://localhost:8882/cbioportal/
+
+### For developers ###
+1. Start with the code of a working branch at cbioportal, say release-3.0.0.
+Process exactly the same as above.
+
+2. Create a branch name you would like your code be in deploy, e.g. devel
+Commit changes you made to the code to the devel branch, which will run cbioportal:release-3.0.0
+
+3. Debug your changes using local dockerized portal and db
+configure local portal configuration in portal.properties
+configure local log configuration in log4j.properties
+These files will be used at the 'build_cbio' stage to build the portal docker image
+
+```
+pushd db_IM
+./cgds_im.init.sh
+popd db_IM
+./cbio.devel.sh prep_db
+./cbio.devel.sh clean core
+./cbio.devel.sh integration-test core
+./cbio.devel.sh integration-test core -Dtest=TestDaoCellProfile
+./cbio.deploy.sh build_cbio devel
+./cbio.deploy.sh run_mysql devel
+./cbio.deploy.sh prep_mysql devel
+./cbio.deploy.sh run_cbio devel
+./cbio.deploy.sh load_cbio devel
+```
+
+When you are done, push your changes to the remote 
+
+
+### Obsolete instructions (donot follow) ###
+(see notes/2018Sep23.cbio.local.rst)
+```
+### Handling dependencies in Mac OSX
+brew install git-lfs
+brew install mysql@5.7 #very version picky, has to use mysql57
+brew install maven
+brew install tomcat@8
+brew install mysql-java
+pip install mysql-python
+mysql_upgrade -u root -p password --force
+brew services start tomcat@8
+brew services start mysql@5.7
+### Handling mysql
+# It is important to always grant access to cgds_test.* and cbioportal.* that both test and tomcat will work
+mysql --user root --password=password -ve "CREATE DATABASE cbioportal"
+mysql --user root --password=password -ve "CREATE USER 'cbio_user'@'localhost' IDENTIFIED BY 'somepassword'"
+mysql --user root --password=password -ve "GRANT ALL ON cbioportal.* TO 'cbio_user'@'localhost'"
+mysql --user root --password=password -ve "GRANT ALL ON cgds_test.* TO 'cbio_user'@'localhost'"
+mysql --user root --password=password -ve "flush privileges"
+mysql --user=cbio_user --password=somepassword cbioportal < ${PORTAL_HOME}/db-scripts/src/main/resources/cgds.sql
+mysql --user=cbio_user --password=somepassword cbioportal < ${PORTAL_HOME}/db-scripts/src/main/resources/cgds_im.sql
+#It may be necessary to change time_zone that fi tomcat reports 404 error
+mysql --verbose --help | grep my.cnf
+# set default-time-zone that works for tomcat
+echo "[mysqld] \n default-time-zone='+00:00'" >~/my.cnf # my.cnf depends 
+### Handling tomcat
+#these variables are now defined in my ~/.bash_profile 
+#export CATALINA_HOME="/usr/local/opt/tomcat@8/libexec"
+#export CATALINA_OPTS='-Dauthenticate=false' #guess this overrides property file
+echo 'CATALINA_OPTS="-Dauthenticate=false $CATALINA_OPTS -Ddbconnector=dbcp -XX:MaxPermSize=256m"' >$CATALINA_HOME/bin/setenv.sh
+brew services restart tomcat@8 #MUST use brew services to start/stop
+wget https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war -O $CATALINA_HOME/webapps/sample.war # a small test
+ls $CATALINA_HOME/logs #all the logs went here
+pushd $CATALINA_HOME/lib
+wget https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.15.tar.gz
+tar -zxvf mysql-connector-java-8.0.15.tar.gz --strip-components=1 mysql-connector-java-8.0.15/mysql-connector-java-8.0.15.jar
+mv mysql-connector-java-8.0.15.jar mysql-connector-java.jar
+popd
+cp log4j.properties cbioportal/src/main/resources/
+patch $CATALINA_HOME/conf/server.xml <${PORTAL_HOME}/../catalina_server.xml.patch
+
+lsof -i:8080 -i:8005 #find competing tomcat instances
+brew services restart tomcat@8
+#add stuff to $CATALINA_HOME/conf/context.xml # sync password and username with portal.properties.tomcat
+#see https://cbioportal.readthedocs.io/en/latest/Deploying.html
+### Handling cbioportal
+export PORTAL_HOME=$HOME/setup/cbioportal-docker/cbioportal
+pushd $PORTAL_HOME 
+ln -s portal.properties.tomcat portal.properties
+mvn -DskipTests clean install
+sudo cp $PORTAL_HOME/portal/target/cbioportal-*.war $CATALINA_HOME/webapps/cbioportal.war
+brew services restart mysql@5.7 #MUST use brew services to start/stop
+brew services restart comcat@8
+```
+Do your modification and incrementally build and test with local tomcat.
+Use clean to trash intermediatary files.
+Keep the cbioportal/db-scripts/src/main/resources/* synced with db_IM/*.
+Keep the ../datahub/custom/crc_tcga/* synced with example/*.
+
+### Original README.md by The Hyve ###
 # cbioportal-docker @ The Hyve #
 
-The [cBioPortal](https://github.com/cBioPortal/cbioportal) project documents a setup to deploy a cBioPortal server using Docker, in [this section of the documentation](https://cbioportal.readthedocs.io/en/latest/#docker). As cBioPortal traditionally does not distinguish between build-time and deploy-time configuration, the setup documented there builds the application at runtime, and suggests running auxiliary commands in the same container as the webserver. The above approach may sacrifice a few advantages of using Docker by going against some of its idioms. For this reason, the project you are currently looking at documents an alternative setup, which builds a ready-to-run cBioPortal application into a Docker image.
+The [cBioPortal](https://github.com/cBioPortal/cbioportal) project
+documents a setup to deploy a cBioPortal server using Docker,
+in [this section of the documentation](https://docs.cbioportal.org/#2-4-docker).
+As cBioPortal traditionally did not distinguish between build-time and deploy-time configuration,
+the setup documented there builds the application at runtime,
+and suggests running auxiliary commands in the same container as the webserver.
+The above approach may sacrifice a few advantages of using Docker by going against some of its idioms.
+For this reason, the project you are currently looking at documents an alternative setup,
+which builds a ready-to-run cBioPortal application into a Docker image.
 
 To get started, download and install Docker from www.docker.com.
 
 [Notes for non-Linux systems](docs/notes-for-non-linux.md)
 
 ## Usage instructions ##
+This guide supercedes the original Hyve guide if you are using the branch by chaelir
 
 ### Step 1 - Setup network ###
 Create a network in order for the cBioPortal container and mysql database to communicate.
@@ -16,8 +133,7 @@ docker network create cbio-net
 
 ### Step 2 - Run mysql with seed database ###
 Start a MySQL server. The command below stores the database in a folder named
-`/<path_to_save_mysql_db>/db_files/`. This should be an absolute path, that
-does *not* point to a directory already containing database files.
+`/<path_to_save_mysql_db>/db_files/`. This should be an absolute path.
 
 ```
 docker run -d --restart=always \
@@ -96,7 +212,7 @@ docker run -d --name=mongoDB --net=cbio-net \
 Finally, create a container for the Session Service, adding the link to the mongoDB database using `-Dspring.data.mongodb.uri`:
 
 ```
-docker run -d --name=cbio-session-service --net=cbio-net -p 8084:8080 \
+docker run -d --name=cbio-session-service --net=cbio-net \
     -e JAVA_OPTS="-Dspring.data.mongodb.uri=mongodb://mongoDB:27017/session-service" \
     thehyve/cbioportal-session-service:cbiov2.1.0
 ```
