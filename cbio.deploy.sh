@@ -17,7 +17,7 @@ if [ -z $2 ]; then
   echo "#  [run_cbio]: cbio.deploy.sh run_cbio \${branch} -> cbioportal:\${branch} running"
   echo "#  [rebuild_cbio]: "
   echo "#  [migrate_cbio]: "
-  echo "#  [load_cbio]: "
+  echo "#  [populate_cbio]: cbio.deploy.sh populate_cbio \${branch} -> add data sets to cbioportal:\${branch}"
   echo "###Here we describe, in a [stage] how configurable files are copied to cbioportal:"
   echo "#  [build_cbio]: portal.properties -> cbioportal/portal.properties" 
   echo "#Here we describe, github forks from cBioPortal to chaelir; all branch names are perserved"
@@ -73,8 +73,8 @@ db_runtime_path="${build_parent}/cbioportal-docker-runtime"
 db_datahub_path="${build_parent}/datahub"
 db_datahub_priv_path="${build_parent}/datahub_priv"
 db_public_studies=('')
-db_private_studies=('')
-db_public_studies=('public/coadread_tcga')
+db_private_studies=('public/genie')
+db_public_studies=('public/coadread_tcga public/coadread_dfci_2016 public/coadread_genentech public/coadread_mskcc public/coadread_tcga')
 #db_private_studies=('imh/crc_imh')
 #use git lfs fetch to fetch all lfs files
 #use git lfs checkout to checkout fetched file
@@ -115,9 +115,8 @@ fi
 ###SECTION: create docker network ###
 # create a network if not existing, other do not panic
 if [ $stage == "get_network" ]; then
-  cmd="docker network create ${docker_network}"
+  cmd="docker network create ${docker_network} || true"
   echo $cmd
-  #docker network create ${docker_network} || true
 fi
 
 ###SECTION: run mysql docker ###
