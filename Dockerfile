@@ -27,9 +27,13 @@ RUN apt-get install -y --no-install-recommends --fix-missing \
 
 # fetch the cBioPortal sources and version control metadata
 ENV PORTAL_HOME=/cbioportal
+<<<<<<< HEAD
 #RUN git clone --depth 1 -b v1.17.1+backport4787-4917-5057 'https://github.com/thehyve/cbioportal.git' $PORTAL_HOME
 #The source code folder cbioportal is assumed present already
 #cp the source code folder to $PORTAL_HOME
+=======
+#RUN git clone --depth 1 -b v2.1.0 'https://github.com/cBioPortal/cbioportal.git' $PORTAL_HOME
+>>>>>>> cbiov2.1.0
 ADD cbioportal $PORTAL_HOME
 WORKDIR $PORTAL_HOME
 

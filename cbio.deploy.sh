@@ -65,8 +65,13 @@ db_root_password="P@ssword1"
 #how to choose seedDB? see: https://github.com/cBioPortal/datahub/tree/master/seedDB
 #  make sure the seed version is consistent with portal version before seed_mysql
 db_dataseed_path="${build_parent}/datahub/seedDB"
+<<<<<<< HEAD
 db_dataseed_sql="${db_dataseed_path}/seed-cbioportal_hg19_v2.8.2.sql.gz" 
 cgds_init_sql="${db_dataseed_path}/cgds_v2.8.2.sql"
+=======
+db_dataseed_sql="${db_dataseed_path}/seed-cbioportal_hg19_v2.7.3.sql.gz" 
+cgds_init_sql="${db_dataseed_path}/cgds_v2.8.1.sql"
+>>>>>>> cbiov2.1.0
 # local folders for mysql files
 db_runtime_path="${build_parent}/cbioportal-docker-runtime"
 # local folders for public and private data files
