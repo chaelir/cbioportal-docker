@@ -178,7 +178,7 @@ if [ $stage == 'seed_mysql_im' ]; then
     mysql:5.7 \
     sh -c "cat /mnt/immube.init.sql | mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}"
   echo "Take a note: access the running mysql db with the following command:"
-  echo "docker exec -it ${db_host} /bin/bash -c \"mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}\""
+  echo "docker exec ${db_host} /bin/bash -c \"mysql -h${db_host} -u${db_user} -p${db_password} ${db_portal_db_name}\""
   echo "docker logs ${db_host}"
 fi
 
@@ -196,7 +196,7 @@ if [ $stage == 'build_cbio' ]; then
   	&& git checkout ${git_cbio_branch} \
     && cp ../${portal_configure_file} . \
   	&& popd \
-		&& docker build -t ${docker_cbio_image} -f ${docker_cbio_dockerfile} ."
+		&& docker build ${docker_cbio_image} -f ${docker_cbio_dockerfile} ."
   echo $cmd
   echo "#docker images" #you should see cbioportal:${git_cbio_branch} is available
 fi
@@ -254,12 +254,12 @@ fi
 if [ $stage == 'populate_cbio' ]; then
   cmd="echo add_study_data"
   for study in ${db_public_studies[@]}; do
-    cmd="$cmd && docker exec -it ${docker_cbio_instance} bash -c \
+    cmd="$cmd && docker exec ${docker_cbio_instance} bash -c \
       'metaImport.py -u http://localhost:8080/cbioportal \
       -s /mnt/datahub/${study} -o'"
   done
   for study in ${db_private_studies[@]}; do
-    cmd="$cmd && docker exec -it ${docker_cbio_instance} bash -c \
+    cmd="$cmd && docker exec ${docker_cbio_instance} bash -c \
       'metaImport.py -u http://localhost:8080/cbioportal \
       -s /mnt/datahub_priv/${study} -o'"
   done
