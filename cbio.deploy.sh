@@ -196,7 +196,7 @@ if [ $stage == 'build_cbio' ]; then
   	&& git checkout ${git_cbio_branch} \
     && cp ../${portal_configure_file} . \
   	&& popd \
-		&& docker build ${docker_cbio_image} -f ${docker_cbio_dockerfile} ."
+		&& docker build --tag ${docker_cbio_image} -f ${docker_cbio_dockerfile} ."
   echo $cmd
   echo "#docker images" #you should see cbioportal:${git_cbio_branch} is available
 fi
