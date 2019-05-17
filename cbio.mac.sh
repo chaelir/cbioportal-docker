@@ -20,7 +20,7 @@
 ./cbio.deploy.sh seed_mysql release-2.1.0 | bash
 ./cbio.deploy.sh build_cbio release-2.1.0 | bash
 ./cbio.deploy.sh run_cbio release-2.1.0 | bash
-#./cbio.deploy.sh populate_cbio release-2.1.0 | bash
-#./cbio.deploy.sh rerun_cbio release-2.1.0 | bash
+./cbio.deploy.sh populate_cbio release-2.1.0 | bash
+./cbio.deploy.sh rerun_cbio release-2.1.0 | bash
 
 #open brower at http://localhost:8882/cbioportal/ to view

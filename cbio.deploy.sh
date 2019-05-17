@@ -73,8 +73,9 @@ db_runtime_path="${build_parent}/cbioportal-docker-runtime"
 db_datahub_path="${build_parent}/datahub"
 db_datahub_priv_path="${build_parent}/datahub_priv"
 db_public_studies=('')
-db_private_studies=('public/genie')
-db_public_studies=('public/coadread_tcga public/coadread_dfci_2016 public/coadread_genentech public/coadread_mskcc public/coadread_tcga')
+#db_private_studies=('public/genie')
+db_public_studies=('public/coadread_tcga')
+#db_public_studies=('public/coadread_tcga public/coadread_dfci_2016 public/coadread_genentech public/coadread_mskcc public/coadread_tcga')
 #db_private_studies=('imh/crc_imh')
 #use git lfs fetch to fetch all lfs files
 #use git lfs checkout to checkout fetched file
