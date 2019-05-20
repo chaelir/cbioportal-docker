@@ -1,10 +1,10 @@
 #!/bin/bash
 
-### NOTE: this requires pre-installed
-### homebrew, docker and xcode-tools
+### NOTE: this requires pre-installed of docker ###
 
 mkdir -p $HOME/setup
 cd  $HOME/setup
+xcode-select --install
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 brew install git || brew upgrade git
 brew install git-lfs || brew upgrade git-lfs
