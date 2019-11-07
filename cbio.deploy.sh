@@ -49,7 +49,9 @@ docker_network="cbio-net1"
 #this points to the local git source folder of cbioportal
 git_cbio_local="cbioportal"
 git_cbio_branch=${branch}
-git_cbio_remote="https://github.com/chaelir/cbioportal.git"
+#git_cbio_remote="https://github.com/chaelir/cbioportal.git"
+git_datahub_remote="https://github.com/chaelir/datahub.git"
+git_cbio_remote="https://github.com/dippindots/cbioportal.git"
 portal_configure_file="portal.properties"
 docker_cbio_dockerfile="Dockerfile"
 docker_cbio_image="cbioportal:${git_cbio_branch}"
@@ -122,7 +124,10 @@ fi
 
 ###SECTION: run mysql docker ###
 if [ $stage == 'run_mysql' ]; then
-  cmd="(mkdir ${db_runtime_path}/${db_host} || true) \
+  cmd="(cd ${build_parent} 
+	  && git clone ${git_datahub_remote} || true) \
+    && (mkdir -p ${db_runtime_path}/${db_host} || true) \
+    && (mkdir -p ${db_datahub_priv_path} || true) \
     && (docker pull mysql:5.7 || true) \
   	&& (docker rm -f ${db_host} || true) \
     && docker run -d --restart=${docker_restart} \

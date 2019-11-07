@@ -3,24 +3,25 @@
 ## Instructions ##
 
 ### For users ###
-Identify a cbioportal branch you would like to use, e.g. release-2.1.0 .
+Identify a cbioportal branch you would like to use, e.g. generic_assay .
 Deploy the instances based on this choice.
 ```
-./cbio.deploy.sh run_mysql release-2.1.0
-./cbio.deploy.sh prep_mysql release-2.1.0 
-./cbio.deploy.sh build_cbio release-2.1.0
-./cbio.deploy.sh run_cbio release-2.1.0
-./cbio.deploy.sh populate_cbio release-2.1.0
+./cbio.deploy.sh get_network generic_assay
+./cbio.deploy.sh run_mysql generic_assay
+./cbio.deploy.sh prep_mysql generic_assay 
+./cbio.deploy.sh build_cbio generic_assay
+./cbio.deploy.sh run_cbio generic_assay
+./cbio.deploy.sh populate_cbio generic_assay
 
 ```
 Now check your browser at http://localhost:8882/cbioportal/
 
 ### For developers ###
-1. Start with the code of a working branch at cbioportal, say release-2.1.0.
+1. Start with the code of a working branch at cbioportal, say generic_assay.
 Process exactly the same as above.
 
 2. Create a branch name you would like your code be in deploy, e.g. devel
-Commit changes you made to the code to the devel branch, which will run cbioportal:release-2.1.0
+Commit changes you made to the code to the devel branch, which will run cbioportal:generic_assay
 
 3. Debug your changes using local dockerized portal and db
 configure local portal configuration in portal.properties
