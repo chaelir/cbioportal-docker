@@ -9,6 +9,7 @@ Deploy the instances based on this choice.
 ./cbio.deploy.sh get_network generic_assay
 ./cbio.deploy.sh run_mysql generic_assay
 ./cbio.deploy.sh prep_mysql generic_assay 
+./cbio.deploy.sh seed_mysql generic_assay
 ./cbio.deploy.sh build_cbio generic_assay
 ./cbio.deploy.sh run_cbio generic_assay
 ./cbio.deploy.sh populate_cbio generic_assay

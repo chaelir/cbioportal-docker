@@ -9,9 +9,12 @@ if [ -z $2 ]; then
   echo "###input a stage and a cbio branch name:"
   echo "#  available stages: \${stage}=dry | get_network | run_mysql | seed_mysql | build_cbio and more, see below"
   echo "#  available branches: \${branch}=release-3.0.0"
-  echo "###Here we describe each stage and its output:"
+  echo "### Here a new workflow based on https://github.com/cBioPortal/cbioportal/tree/master/docs/docker"
+  echo "#  [get_network]: cbio.deploy.sh get_network \${branch} -> cbio-net running"
   echo "#  [run_mysql]: cbio.deploy.sh run_mysql \${branch} -> mysql:5.7 running"
   echo "#  [seed_mysql]: cbio.deploy.sh seed_mysql \${branch} -> mysql:5.7 running with seedDB"
+  echo "#"  
+  echo "###Here we describe each stage and its output:"
   echo "#  [seed_mysql_im]: cbio.deploy.sh seed_mysql_im \${branch} -> mysql:5.7 running with seedDB and mimmubeDB"
   echo "#  [build_cbio]: cbio.deploy.sh build_cbio \${branch} -> cbioportal:\${branch} built"
   echo "#  [run_cbio]: cbio.deploy.sh run_cbio \${branch} -> cbioportal:\${branch} running"
@@ -53,7 +56,7 @@ git_cbio_branch=${branch}
 git_datahub_remote="https://github.com/chaelir/datahub.git"
 git_cbio_remote="https://github.com/dippindots/cbioportal.git"
 portal_configure_file="portal.properties"
-docker_cbio_dockerfile="Dockerfile"
+docker_cbio_dockerfile="cbioportal/docker/web-and-data/Dockerfile"
 docker_cbio_image="cbioportal:${git_cbio_branch}"
 docker_cbio_instance="cbioPortal1"
 docker_cbio_port=8882
@@ -202,7 +205,7 @@ if [ $stage == 'build_cbio' ]; then
   	&& git checkout ${git_cbio_branch} \
     && cp ../${portal_configure_file} . \
   	&& popd \
-		&& docker build --tag ${docker_cbio_image} -f ${docker_cbio_dockerfile} ."
+	&& docker build --tag ${docker_cbio_image} -f ${docker_cbio_dockerfile} ."
   echo $cmd
   echo "#docker images" #you should see cbioportal:${git_cbio_branch} is available
 fi
