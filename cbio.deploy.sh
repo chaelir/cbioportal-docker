@@ -13,14 +13,17 @@ if [ -z $2 ]; then
   echo "#  [get_network]: cbio.deploy.sh get_network \${branch} -> cbio-net running"
   echo "#  [run_mysql]: cbio.deploy.sh run_mysql \${branch} -> mysql:5.7 running"
   echo "#  [seed_mysql]: cbio.deploy.sh seed_mysql \${branch} -> mysql:5.7 running with seedDB"
+  echo "#  [build_cbio]: cbio.deploy.sh build_cbio \${branch} -> cbioportal:\${branch} built"
+  echo "#  [migrate_cbio]: cbio.deploy.sh build_cbio \${branch} -> cbioportal:\${branch} db version"
+  echo "#  [create_mongo]: cbio.deploy.sh create_mongo \${branch} -> "
+  echo "#  [create_session]: cbio.deploy.sh create_session \${branch} -> "
+
+  echo "#  [run_cbio]: cbio.deploy.sh run_cbio \${branch} -> cbioportal:\${branch} running"
+  echo "#  [rebuild_cbio]: "
+  echo "#  [populate_cbio]: cbio.deploy.sh populate_cbio \${branch} -> add data sets to cbioportal:\${branch}"
   echo "#"  
   echo "###Here we describe each stage and its output:"
   echo "#  [seed_mysql_im]: cbio.deploy.sh seed_mysql_im \${branch} -> mysql:5.7 running with seedDB and mimmubeDB"
-  echo "#  [build_cbio]: cbio.deploy.sh build_cbio \${branch} -> cbioportal:\${branch} built"
-  echo "#  [run_cbio]: cbio.deploy.sh run_cbio \${branch} -> cbioportal:\${branch} running"
-  echo "#  [rebuild_cbio]: "
-  echo "#  [migrate_cbio]: "
-  echo "#  [populate_cbio]: cbio.deploy.sh populate_cbio \${branch} -> add data sets to cbioportal:\${branch}"
   echo "###Here we describe, in a [stage] how configurable files are copied to cbioportal:"
   echo "#  [build_cbio]: portal.properties -> cbioportal/portal.properties" 
   echo "#Here we describe, github forks from cBioPortal to chaelir; all branch names are perserved"
@@ -56,7 +59,7 @@ git_cbio_branch=${branch}
 git_datahub_remote="https://github.com/chaelir/datahub.git"
 git_cbio_remote="https://github.com/dippindots/cbioportal.git"
 portal_configure_file="portal.properties"
-docker_cbio_dockerfile="cbioportal/docker/web-and-data/Dockerfile"
+docker_cbio_dockerfile="docker/web-and-data/Dockerfile"
 docker_cbio_image="cbioportal:${git_cbio_branch}"
 docker_cbio_instance="cbioPortal1"
 docker_cbio_port=8882
@@ -203,9 +206,9 @@ if [ $stage == 'build_cbio' ]; then
     && pushd ${git_cbio_local} \
   	&& git pull origin ${git_cbio_branch} \
   	&& git checkout ${git_cbio_branch} \
-    && cp ../${portal_configure_file} . \
-  	&& popd \
-	&& docker build --tag ${docker_cbio_image} -f ${docker_cbio_dockerfile} ."
+	&& docker build --tag ${docker_cbio_image} -f ${docker_cbio_dockerfile} . \
+	&& popd"
+    #&& cp ../${portal_configure_file} . \
   echo $cmd
   echo "#docker images" #you should see cbioportal:${git_cbio_branch} is available
 fi
@@ -217,12 +220,18 @@ if [ $stage == 'run_cbio' ]; then
   	&& docker run -d --restart=${docker_restart} \
     	--name=${docker_cbio_instance} \
     	--net=${docker_network} \
+        -v ${build_root}/${portal_configure_file}:/cbioportal/portal.properties:ro \
+	-e JAVA_OPTS='-Xms2g
+                      -Xmx4g
+                      -Dauthenticate=noauthsessionservice
+                      -Dsession.service.url=http://cbio-session-service:5000/api/sessions/my_portal/
+                     ' \
     	-e TZ="${docker_timezone}" \
-    	-e CATALINA_OPTS='${docker_cbio_opt}' \
-    	-v ${db_datahub_path}/:/mnt/datahub/ \
-    	-v ${db_datahub_priv_path}/:/mnt/datahub_priv/ \
     	-p ${docker_cbio_port}:8080 \
-			${docker_cbio_image}"
+	${docker_cbio_image} \
+	/bin/sh -c 'java \$JAVA_OPTS -jar webapp-runner.jar /cbioportal-webapp'"
+    	#-v ${db_datahub_path}/:/mnt/datahub/ \
+    	#-v ${db_datahub_priv_path}/:/mnt/datahub_priv/ \
   echo $cmd
   echo "#docker exec -it ${docker_cbio_instance} /bin/bash -c \"echo command\" "
   echo "#docker logs ${docker_cbio_instance}"
@@ -245,7 +254,7 @@ if [ $stage == 'rerun_cbio' ]; then
     	 -v ${db_datahub_path}/:/mnt/datahub/ \
     	 -v ${db_datahub_priv_path}/:/mnt/datahub_priv/ \
     	 -p ${docker_cbio_port}:8080 \
-			 ${docker_cbio_image}"
+	 ${docker_cbio_image}"
   echo $cmd
   echo "#docker exec -it ${docker_cbio_instance} /bin/bash -c \"echo command\" "
   echo "#docker logs ${docker_cbio_instance}"
@@ -253,11 +262,32 @@ fi
 
 ###SECTION: migrate seedDB ###
 if [ $stage == 'migrate_cbio' ]; then
-  cmd="docker exec -it ${docker_cbio_instance} bash -c \
-    'migrate_db.py --properties-file /cbioportal/portal.properties \
-    --sql /cbioportal/db-scripts/src/main/resources/migration.sql'"
+  cmd="docker run --net ${docker_network} --rm -it \
+      -v ${build_root}/${portal_configure_file}:/cbioportal/portal.properties:ro \
+      ${docker_cbio_image} \
+      migrate_db.py --properties-file /cbioportal/portal.properties \
+      --sql /cbioportal/db-scripts/src/main/resources/migration.sql"
   echo $cmd
 fi
+
+###SECTION: add mongoDB ###
+if [ $stage == 'create_mongo' ]; then
+  cmd="docker run -d --net ${docker_network} \
+       --name=mongoDB \
+       -e MONGO_INITDB_DATABASE=session_service \
+       mongo:3.6.6"       
+  echo $cmd
+fi
+
+###SECTION: add session ###
+if [ $stage == 'create_session' ]; then
+  cmd="docker run -d --net ${docker_network} \
+       --name=cbio-session-service \
+       -e JAVA_OPTS='-Dspring.data.mongodb.uri=mongodb://mongoDB:27017/session-service' \
+       cbioportal/session-service:latest"
+  echo $cmd
+fi
+
 
 ###SECTION: load cbio database ###
 if [ $stage == 'populate_cbio' ]; then
