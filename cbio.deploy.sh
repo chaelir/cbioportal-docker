@@ -17,23 +17,22 @@ if [ -z $2 ]; then
   echo "#  [migrate_cbio]: cbio.deploy.sh build_cbio \${branch} -> cbioportal:\${branch} db version"
   echo "#  [create_mongo]: cbio.deploy.sh create_mongo \${branch} -> "
   echo "#  [create_session]: cbio.deploy.sh create_session \${branch} -> "
-
   echo "#  [run_cbio]: cbio.deploy.sh run_cbio \${branch} -> cbioportal:\${branch} running"
-  echo "#  [rebuild_cbio]: "
-  echo "#  [populate_cbio]: cbio.deploy.sh populate_cbio \${branch} -> add data sets to cbioportal:\${branch}"
+  echo "#  [pop_cbio]: cbio.deploy.sh pop_cbio \${branch} -> add data sets to cbioportal:\${branch}"
+  echo "#  [restart_cbio]: "
   echo "#"  
-  echo "###Here we describe each stage and its output:"
+  echo "### obsolete stage and its output:"
   echo "#  [seed_mysql_im]: cbio.deploy.sh seed_mysql_im \${branch} -> mysql:5.7 running with seedDB and mimmubeDB"
-  echo "###Here we describe, in a [stage] how configurable files are copied to cbioportal:"
-  echo "#  [build_cbio]: portal.properties -> cbioportal/portal.properties" 
-  echo "#Here we describe, github forks from cBioPortal to chaelir; all branch names are perserved"
+  echo "### Here we describe, github forks from cBioPortal to chaelir; all branch names are perserved"
   echo "#  cBioPortal/cbioportal -> chaelir/cbioportal "
   echo "#  cBioPortal/datahub -> chaelir/datahub "
   exit
 fi
+
 #set -x
 stage=$1
 branch=$2
+portal_public_ip="34.214.235.121"
 
 ###SECTION: pathes must use absolute path here to be mounted by docker
 build_root=$(pwd)
@@ -230,8 +229,6 @@ if [ $stage == 'run_cbio' ]; then
     	-p ${docker_cbio_port}:8080 \
 	${docker_cbio_image} \
 	/bin/sh -c 'java \$JAVA_OPTS -jar webapp-runner.jar /cbioportal-webapp'"
-    	#-v ${db_datahub_path}/:/mnt/datahub/ \
-    	#-v ${db_datahub_priv_path}/:/mnt/datahub_priv/ \
   echo $cmd
   echo "#docker exec -it ${docker_cbio_instance} /bin/bash -c \"echo command\" "
   echo "#docker logs ${docker_cbio_instance}"
@@ -265,7 +262,8 @@ if [ $stage == 'migrate_cbio' ]; then
   cmd="docker run --net ${docker_network} --rm -it \
       -v ${build_root}/${portal_configure_file}:/cbioportal/portal.properties:ro \
       ${docker_cbio_image} \
-      migrate_db.py --properties-file /cbioportal/portal.properties \
+      /cbioportal/core/src/main/scripts/migrate_db.py \
+      --properties-file /cbioportal/portal.properties \
       --sql /cbioportal/db-scripts/src/main/resources/migration.sql"
   echo $cmd
 fi
@@ -290,17 +288,21 @@ fi
 
 
 ###SECTION: load cbio database ###
-if [ $stage == 'populate_cbio' ]; then
+if [ $stage == 'pop_cbio' ]; then
   cmd="echo add_study_data"
   for study in ${db_public_studies[@]}; do
-    cmd="$cmd && docker exec ${docker_cbio_instance} bash -c \
-      'metaImport.py -u http://localhost:8080/cbioportal \
-      -s /mnt/datahub/${study} -o'"
+    cmd="$cmd && docker run --net ${docker_network} --rm -it \
+    	  -v ${db_datahub_path}/:/mnt/datahub/ \
+	    ${docker_cbio_image} 
+          metaImport.py -u http://${portal_public_ip}:8882 \
+          -s /mnt/datahub/${study} -o"
   done
-  for study in ${db_private_studies[@]}; do
-    cmd="$cmd && docker exec ${docker_cbio_instance} bash -c \
-      'metaImport.py -u http://localhost:8080/cbioportal \
-      -s /mnt/datahub_priv/${study} -o'"
-  done
+          #-v ${build_root}/${portal_configure_file}:/cbioportal/portal.properties:ro \
+    	  #-v ${db_datahub_priv_path}/:/mnt/datahub_priv/ \
+  #for study in ${db_private_studies[@]}; do
+  #  cmd="$cmd && docker exec ${docker_cbio_instance} bash -c \
+  #    'metaImport.py -u http://localhost:8080/cbioportal \
+  #    -s /mnt/datahub_priv/${study} -o'"
+  #done
   echo $cmd
 fi
